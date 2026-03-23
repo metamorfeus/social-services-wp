@@ -134,17 +134,20 @@ class SSD_Ajax {
         
         $user_id = get_current_user_id();
         $provider_id = intval($_POST['provider_id']);
-        $rating = floatval($_POST['rating']);
-        $title = sanitize_text_field($_POST['title']);
-        $review_text = sanitize_textarea_field($_POST['review_text']);
-        
-        // Validate
-        if ($rating < 1 || $rating > 5) {
+
+        // Validate rating immediately before any further processing
+        $rating_raw = floatval($_POST['rating'] ?? 0);
+        if ($rating_raw < 1 || $rating_raw > 5) {
             wp_send_json_error(array(
                 'message' => __('Invalid rating.', 'social-services-directory')
             ));
+            return;
         }
-        
+        $rating = $rating_raw;
+
+        $title = sanitize_text_field($_POST['title'] ?? '');
+        $review_text = sanitize_textarea_field($_POST['review_text'] ?? '');
+
         if (empty($title) || empty($review_text)) {
             wp_send_json_error(array(
                 'message' => __('Title and review text are required.', 'social-services-directory')

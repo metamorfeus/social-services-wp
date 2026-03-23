@@ -186,9 +186,14 @@ class SSD_Import {
         }
         
         $file = $_FILES['csv_file']['tmp_name'];
+
+        if (!is_uploaded_file($file)) {
+            wp_die(__('Invalid file upload.', 'social-services-directory'));
+        }
+
         $batch_size = intval($_POST['batch_size'] ?? 50);
         $update_existing = isset($_POST['update_existing']);
-        
+
         set_time_limit(0);
         ini_set('memory_limit', '512M');
         
@@ -260,10 +265,15 @@ class SSD_Import {
         $existing = null;
         if ($eik && $update_existing) {
             $existing_query = new WP_Query(array(
-                'post_type' => 'ssd_provider',
-                'meta_key' => '_ssd_eik',
-                'meta_value' => $eik,
-                'posts_per_page' => 1
+                'post_type'      => 'ssd_provider',
+                'posts_per_page' => 1,
+                'meta_query'     => array(
+                    array(
+                        'key'     => '_ssd_eik',
+                        'value'   => $eik,
+                        'compare' => '=',
+                    ),
+                ),
             ));
             
             if ($existing_query->have_posts()) {

@@ -199,7 +199,7 @@ class SSD_Admin {
             
             global $wpdb;
             $review_table = $wpdb->prefix . 'ssd_reviews';
-            $review_count = $wpdb->get_var("SELECT COUNT(*) FROM $review_table WHERE status = 'approved'");
+            $review_count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $review_table WHERE status = %s", 'approved'));
             ?>
             
             <table class="widefat">

@@ -156,22 +156,20 @@ class Social_Services_Directory {
             SSD_VERSION
         );
         
-        // Select2 for advanced filtering
-        wp_enqueue_style(
-            'select2',
-            'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css',
-            array(),
-            '4.1.0'
-        );
-        
+        // Select2 for advanced filtering — prefer local copy, fall back to CDN
+        $select2_css_local = SSD_PLUGIN_DIR . 'assets/css/select2.min.css';
+        $select2_js_local  = SSD_PLUGIN_DIR . 'assets/js/select2.min.js';
+        $select2_css_url   = file_exists($select2_css_local)
+            ? SSD_PLUGIN_URL . 'assets/css/select2.min.css'
+            : 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css';
+        $select2_js_url    = file_exists($select2_js_local)
+            ? SSD_PLUGIN_URL . 'assets/js/select2.min.js'
+            : 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js';
+
+        wp_enqueue_style('select2', $select2_css_url, array(), '4.1.0');
+
         // JavaScript
-        wp_enqueue_script(
-            'select2',
-            'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js',
-            array('jquery'),
-            '4.1.0',
-            true
-        );
+        wp_enqueue_script('select2', $select2_js_url, array('jquery'), '4.1.0', true);
         
         wp_enqueue_script(
             'ssd-frontend',

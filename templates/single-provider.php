@@ -49,7 +49,7 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
         <div class="ssd-back-navigation">
             <a href="javascript:history.back()" class="ssd-back-button">
                 <span class="dashicons dashicons-arrow-left-alt2"></span>
-                Обратно към директорията
+                <?php _e('Обратно към директорията', 'social-services-directory'); ?>
             </a>
         </div>
         
@@ -70,7 +70,7 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
                 <!-- Photo Gallery -->
                 <?php if (!empty($photos)): ?>
                     <div class="ssd-photo-gallery-thumbs">
-                        <h4>Галерия (<?php echo count($photos); ?> снимки)</h4>
+                        <h4><?php printf(esc_html__('Галерия (%d снимки)', 'social-services-directory'), count($photos)); ?></h4>
                         <div class="ssd-thumbs-grid">
                             <?php foreach ($photos as $photo): ?>
                                 <div class="ssd-thumb-item" data-image-id="<?php echo $photo->attachment_id; ?>">
@@ -88,12 +88,12 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
                 <?php if ($rating_data['count'] > 0): ?>
                     <div class="ssd-provider-rating-large">
                         <?php echo SSD_Frontend::render_stars($rating_data['average']); ?>
-                        <span class="ssd-rating-number"><?php echo $rating_data['average']; ?></span>
-                        <span class="ssd-rating-count">(<?php echo $rating_data['count']; ?> отзива)</span>
+                        <span class="ssd-rating-number"><?php echo esc_html($rating_data['average']); ?></span>
+                        <span class="ssd-rating-count">(<?php printf(esc_html__('%d отзива', 'social-services-directory'), intval($rating_data['count'])); ?>)</span>
                     </div>
                 <?php endif; ?>
                 
-                <?php if ($municipality): ?>
+                <?php if (!is_wp_error($municipality) && !empty($municipality)): ?>
                     <div class="ssd-provider-location-large">
                         <span class="dashicons dashicons-location"></span>
                         <strong><?php echo esc_html($municipality[0]->name); ?></strong>
@@ -117,21 +117,21 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
                     <?php if ($phone): ?>
                         <a href="tel:<?php echo esc_attr($phone); ?>" class="ssd-action-button ssd-call-button">
                             <span class="dashicons dashicons-phone"></span>
-                            Обадете се
+                            <?php _e('Обадете се', 'social-services-directory'); ?>
                         </a>
                     <?php endif; ?>
                     
                     <?php if ($email): ?>
                         <a href="mailto:<?php echo esc_attr($email); ?>" class="ssd-action-button ssd-email-button">
                             <span class="dashicons dashicons-email"></span>
-                            Изпратете имейл
+                            <?php _e('Изпратете имейл', 'social-services-directory'); ?>
                         </a>
                     <?php endif; ?>
                     
                     <?php if ($website): ?>
                         <a href="<?php echo esc_url($website); ?>" target="_blank" class="ssd-action-button ssd-website-button">
                             <span class="dashicons dashicons-admin-links"></span>
-                            Уебсайт
+                            <?php _e('Уебсайт', 'social-services-directory'); ?>
                         </a>
                     <?php endif; ?>
                 </div>
@@ -143,27 +143,27 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
             
             <!-- Basic Information -->
             <div class="ssd-details-section">
-                <h2 class="ssd-section-title">Основна информация</h2>
+                <h2 class="ssd-section-title"><?php _e('Основна информация', 'social-services-directory'); ?></h2>
                 <div class="ssd-details-grid">
                     <div class="ssd-detail-item">
-                        <span class="ssd-detail-label">ЕИК:</span>
+                        <span class="ssd-detail-label"><?php _e('ЕИК:', 'social-services-directory'); ?></span>
                         <span class="ssd-detail-value"><?php echo $eik ? esc_html($eik) : '-'; ?></span>
                     </div>
-                    
+
                     <div class="ssd-detail-item">
-                        <span class="ssd-detail-label">Община:</span>
+                        <span class="ssd-detail-label"><?php _e('Община:', 'social-services-directory'); ?></span>
                         <span class="ssd-detail-value">
-                            <?php echo $municipality ? esc_html($municipality[0]->name) : '-'; ?>
+                            <?php echo !empty($municipality) ? esc_html($municipality[0]->name) : '-'; ?>
                         </span>
                     </div>
-                    
+
                     <div class="ssd-detail-item">
-                        <span class="ssd-detail-label">Населено място:</span>
+                        <span class="ssd-detail-label"><?php _e('Населено място:', 'social-services-directory'); ?></span>
                         <span class="ssd-detail-value"><?php echo $settlement ? esc_html($settlement) : '-'; ?></span>
                     </div>
-                    
+
                     <div class="ssd-detail-item ssd-detail-full">
-                        <span class="ssd-detail-label">Адрес:</span>
+                        <span class="ssd-detail-label"><?php _e('Адрес:', 'social-services-directory'); ?></span>
                         <span class="ssd-detail-value"><?php echo $address ? esc_html($address) : '-'; ?></span>
                     </div>
                 </div>
@@ -171,13 +171,13 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
             
             <!-- Services and Target Groups -->
             <div class="ssd-details-section">
-                <h2 class="ssd-section-title">Услуги и целеви групи</h2>
+                <h2 class="ssd-section-title"><?php _e('Услуги и целеви групи', 'social-services-directory'); ?></h2>
                 <div class="ssd-details-grid">
                     <div class="ssd-detail-item ssd-detail-full">
-                        <span class="ssd-detail-label">Социална услуга:</span>
+                        <span class="ssd-detail-label"><?php _e('Социална услуга:', 'social-services-directory'); ?></span>
                         <span class="ssd-detail-value">
                             <?php if ($services): ?>
-                                <?php 
+                                <?php
                                 $service_names = array_map(function($s) { return $s->name; }, $services);
                                 echo esc_html(implode(', ', $service_names));
                                 ?>
@@ -186,9 +186,9 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
                             <?php endif; ?>
                         </span>
                     </div>
-                    
+
                     <div class="ssd-detail-item ssd-detail-full">
-                        <span class="ssd-detail-label">Целева група:</span>
+                        <span class="ssd-detail-label"><?php _e('Целева група:', 'social-services-directory'); ?></span>
                         <span class="ssd-detail-value"><?php echo $target_group ? esc_html($target_group) : '-'; ?></span>
                     </div>
                 </div>
@@ -196,28 +196,28 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
             
             <!-- License Information -->
             <div class="ssd-details-section">
-                <h2 class="ssd-section-title">Лицензна информация</h2>
-                
+                <h2 class="ssd-section-title"><?php _e('Лицензна информация', 'social-services-directory'); ?></h2>
+
                 <!-- Original License -->
                 <div class="ssd-license-block">
-                    <h3 class="ssd-license-subtitle">Оригинален лиценз</h3>
+                    <h3 class="ssd-license-subtitle"><?php _e('Оригинален лиценз', 'social-services-directory'); ?></h3>
                     <div class="ssd-details-grid">
                         <div class="ssd-detail-item">
-                            <span class="ssd-detail-label">Номер и дата на издаване:</span>
+                            <span class="ssd-detail-label"><?php _e('Номер и дата на издаване:', 'social-services-directory'); ?></span>
                             <span class="ssd-detail-value"><?php echo $license_number ? esc_html($license_number) : '-'; ?></span>
                         </div>
-                        
+
                         <div class="ssd-detail-item">
-                            <span class="ssd-detail-label">Дата на валидност:</span>
+                            <span class="ssd-detail-label"><?php _e('Дата на валидност:', 'social-services-directory'); ?></span>
                             <span class="ssd-detail-value">
-                                <?php 
+                                <?php
                                 if ($license_validity) {
                                     $validity_date = strtotime($license_validity);
                                     echo esc_html(date('d.m.Y', $validity_date));
-                                    
+
                                     // Check if expired
                                     if ($validity_date < time()) {
-                                        echo ' <span class="ssd-expired-badge">Изтекъл</span>';
+                                        echo ' <span class="ssd-expired-badge">' . esc_html__('Изтекъл', 'social-services-directory') . '</span>';
                                     }
                                 } else {
                                     echo '-';
@@ -227,27 +227,27 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Modified License -->
                 <?php if ($license_modified_number): ?>
                     <div class="ssd-license-block">
-                        <h3 class="ssd-license-subtitle">Лиценз с промяна в обстоятелствата</h3>
+                        <h3 class="ssd-license-subtitle"><?php _e('Лиценз с промяна в обстоятелствата', 'social-services-directory'); ?></h3>
                         <div class="ssd-details-grid">
                             <div class="ssd-detail-item">
-                                <span class="ssd-detail-label">Номер и дата на издаване:</span>
+                                <span class="ssd-detail-label"><?php _e('Номер и дата на издаване:', 'social-services-directory'); ?></span>
                                 <span class="ssd-detail-value"><?php echo esc_html($license_modified_number); ?></span>
                             </div>
-                            
+
                             <div class="ssd-detail-item">
-                                <span class="ssd-detail-label">Дата на валидност:</span>
+                                <span class="ssd-detail-label"><?php _e('Дата на валидност:', 'social-services-directory'); ?></span>
                                 <span class="ssd-detail-value">
-                                    <?php 
+                                    <?php
                                     if ($license_modified_validity) {
                                         $validity_date = strtotime($license_modified_validity);
                                         echo esc_html(date('d.m.Y', $validity_date));
-                                        
+
                                         if ($validity_date < time()) {
-                                            echo ' <span class="ssd-expired-badge">Изтекъл</span>';
+                                            echo ' <span class="ssd-expired-badge">' . esc_html__('Изтекъл', 'social-services-directory') . '</span>';
                                         }
                                     } else {
                                         echo '-';
@@ -262,10 +262,10 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
             
             <!-- Contact Information -->
             <div class="ssd-details-section">
-                <h2 class="ssd-section-title">Контактна информация</h2>
+                <h2 class="ssd-section-title"><?php _e('Контактна информация', 'social-services-directory'); ?></h2>
                 <div class="ssd-details-grid">
                     <div class="ssd-detail-item">
-                        <span class="ssd-detail-label">Телефон:</span>
+                        <span class="ssd-detail-label"><?php _e('Телефон:', 'social-services-directory'); ?></span>
                         <span class="ssd-detail-value">
                             <?php if ($phone): ?>
                                 <a href="tel:<?php echo esc_attr($phone); ?>"><?php echo esc_html($phone); ?></a>
@@ -276,7 +276,7 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
                     </div>
                     
                     <div class="ssd-detail-item">
-                        <span class="ssd-detail-label">Имейл:</span>
+                        <span class="ssd-detail-label"><?php _e('Имейл:', 'social-services-directory'); ?></span>
                         <span class="ssd-detail-value">
                             <?php if ($email): ?>
                                 <a href="mailto:<?php echo esc_attr($email); ?>"><?php echo esc_html($email); ?></a>
@@ -287,7 +287,7 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
                     </div>
                     
                     <div class="ssd-detail-item">
-                        <span class="ssd-detail-label">Уебсайт:</span>
+                        <span class="ssd-detail-label"><?php _e('Уебсайт:', 'social-services-directory'); ?></span>
                         <span class="ssd-detail-value">
                             <?php if ($website): ?>
                                 <a href="<?php echo esc_url($website); ?>" target="_blank"><?php echo esc_html($website); ?></a>
@@ -299,7 +299,7 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
                     
                     <?php if ($working_hours): ?>
                         <div class="ssd-detail-item ssd-detail-full">
-                            <span class="ssd-detail-label">Работно време:</span>
+                            <span class="ssd-detail-label"><?php _e('Работно време:', 'social-services-directory'); ?></span>
                             <span class="ssd-detail-value"><?php echo nl2br(esc_html($working_hours)); ?></span>
                         </div>
                     <?php endif; ?>
@@ -309,7 +309,7 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
             <!-- Violations -->
             <?php if ($violations): ?>
                 <div class="ssd-details-section ssd-violations-section">
-                    <h2 class="ssd-section-title">Установени нарушения</h2>
+                    <h2 class="ssd-section-title"><?php _e('Установени нарушения', 'social-services-directory'); ?></h2>
                     <div class="ssd-violations-content">
                         <?php echo nl2br(esc_html($violations)); ?>
                     </div>
@@ -319,7 +319,7 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
             <!-- Description -->
             <?php if (get_the_content()): ?>
                 <div class="ssd-details-section">
-                    <h2 class="ssd-section-title">Описание</h2>
+                    <h2 class="ssd-section-title"><?php _e('Описание', 'social-services-directory'); ?></h2>
                     <div class="ssd-provider-description">
                         <?php the_content(); ?>
                     </div>
@@ -329,14 +329,14 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
             <!-- Reviews Section -->
             <?php if (get_option('ssd_enable_reviews', true)): ?>
                 <div class="ssd-details-section">
-                    <h2 class="ssd-section-title">Отзиви и оценки</h2>
-                    
+                    <h2 class="ssd-section-title"><?php _e('Отзиви и оценки', 'social-services-directory'); ?></h2>
+
                     <?php if ($rating_data['count'] > 0): ?>
                         <div class="ssd-reviews-summary">
                             <div class="ssd-reviews-overall">
-                                <div class="ssd-overall-rating"><?php echo $rating_data['average']; ?></div>
+                                <div class="ssd-overall-rating"><?php echo esc_html($rating_data['average']); ?></div>
                                 <?php echo SSD_Frontend::render_stars($rating_data['average']); ?>
-                                <div class="ssd-reviews-count"><?php echo $rating_data['count']; ?> отзива</div>
+                                <div class="ssd-reviews-count"><?php printf(esc_html__('%d отзива', 'social-services-directory'), intval($rating_data['count'])); ?></div>
                             </div>
                         </div>
                         
@@ -378,16 +378,19 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
                             ?>
                         </div>
                     <?php else: ?>
-                        <p class="ssd-no-reviews">Все още няма отзиви за този доставчик.</p>
+                        <p class="ssd-no-reviews"><?php _e('Все още няма отзиви за този доставчик.', 'social-services-directory'); ?></p>
                     <?php endif; ?>
                     
                     <?php if (is_user_logged_in()): ?>
-                        <button class="button ssd-write-review-btn" data-provider-id="<?php echo $provider_id; ?>">
-                            Напишете отзив
+                        <button class="button ssd-write-review-btn" data-provider-id="<?php echo esc_attr($provider_id); ?>">
+                            <?php _e('Напишете отзив', 'social-services-directory'); ?>
                         </button>
                     <?php else: ?>
                         <p class="ssd-login-notice">
-                            <a href="<?php echo wp_login_url(get_permalink()); ?>">Влезте</a>, за да напишете отзив.
+                            <?php printf(
+                                __('<a href="%s">Влезте</a>, за да напишете отзив.', 'social-services-directory'),
+                                esc_url(wp_login_url(get_permalink()))
+                            ); ?>
                         </p>
                     <?php endif; ?>
                 </div>

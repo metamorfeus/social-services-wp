@@ -49,7 +49,8 @@ class SSD_Reviews {
         }
         
         // Get reviews
-        $status = isset($_GET['status']) ? sanitize_text_field($_GET['status']) : 'pending';
+        $allowed_statuses = array('pending', 'approved', 'spam');
+        $status = (isset($_GET['status']) && in_array($_GET['status'], $allowed_statuses, true)) ? $_GET['status'] : 'pending';
         $paged = isset($_GET['paged']) ? intval($_GET['paged']) : 1;
         $per_page = 20;
         $offset = ($paged - 1) * $per_page;
@@ -72,9 +73,9 @@ class SSD_Reviews {
             $status
         ));
         
-        $pending_count = $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE status = 'pending'");
-        $approved_count = $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE status = 'approved'");
-        $spam_count = $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE status = 'spam'");
+        $pending_count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table WHERE status = %s", 'pending'));
+        $approved_count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table WHERE status = %s", 'approved'));
+        $spam_count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table WHERE status = %s", 'spam'));
         
         ?>
         <div class="wrap">
@@ -84,19 +85,19 @@ class SSD_Reviews {
                 <li>
                     <a href="?post_type=ssd_provider&page=ssd-reviews&status=pending" <?php echo $status === 'pending' ? 'class="current"' : ''; ?>>
                         <?php _e('Pending', 'social-services-directory'); ?> 
-                        <span class="count">(<?php echo $pending_count; ?>)</span>
+                        <span class="count">(<?php echo intval($pending_count); ?>)</span>
                     </a> |
                 </li>
                 <li>
                     <a href="?post_type=ssd_provider&page=ssd-reviews&status=approved" <?php echo $status === 'approved' ? 'class="current"' : ''; ?>>
-                        <?php _e('Approved', 'social-services-directory'); ?> 
-                        <span class="count">(<?php echo $approved_count; ?>)</span>
+                        <?php _e('Approved', 'social-services-directory'); ?>
+                        <span class="count">(<?php echo intval($approved_count); ?>)</span>
                     </a> |
                 </li>
                 <li>
                     <a href="?post_type=ssd_provider&page=ssd-reviews&status=spam" <?php echo $status === 'spam' ? 'class="current"' : ''; ?>>
-                        <?php _e('Spam', 'social-services-directory'); ?> 
-                        <span class="count">(<?php echo $spam_count; ?>)</span>
+                        <?php _e('Spam', 'social-services-directory'); ?>
+                        <span class="count">(<?php echo intval($spam_count); ?>)</span>
                     </a>
                 </li>
             </ul>

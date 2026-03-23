@@ -50,17 +50,5 @@ class SSD_Post_Types {
             'capability_type' => 'post'
         ));
         
-        // Review Post Type (for user reviews)
-        register_post_type('ssd_review', array(
-            'labels' => array(
-                'name' => __('Reviews', 'social-services-directory'),
-                'singular_name' => __('Review', 'social-services-directory')
-            ),
-            'public' => false,
-            'show_ui' => true,
-            'show_in_menu' => 'edit.php?post_type=ssd_provider',
-            'supports' => array('title', 'editor', 'author'),
-            'capability_type' => 'post'
-        ));
     }
 }
