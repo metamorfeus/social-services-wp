@@ -1,0 +1,612 @@
+/**
+ * Social Services Directory - Frontend Styles
+ * Version: 1.0.0
+ */
+
+/* ==========================================================================
+   Directory Wrapper
+   ========================================================================== */
+.ssd-directory-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* ==========================================================================
+   Filters Section
+   ========================================================================== */
+.ssd-filters {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.ssd-filters-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.ssd-filters-header h2 {
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+}
+
+.ssd-toggle-filters {
+    display: none;
+    background: #0073aa;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.ssd-toggle-filters .dashicons {
+    font-size: 16px;
+    margin-right: 5px;
+}
+
+.ssd-filter-form {
+    display: block;
+}
+
+.ssd-filter-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.ssd-filter-field label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #555;
+    font-size: 14px;
+}
+
+.ssd-filter-field input[type="text"],
+.ssd-filter-field select {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.ssd-filter-field input[type="text"]:focus,
+.ssd-filter-field select:focus {
+    outline: none;
+    border-color: #0073aa;
+}
+
+.ssd-filter-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.ssd-filter-actions .button {
+    padding: 12px 25px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.ssd-apply-filters {
+    background: #0073aa;
+    color: #fff;
+    border: none;
+}
+
+.ssd-apply-filters:hover {
+    background: #005a87;
+}
+
+.ssd-reset-filters {
+    background: #f0f0f0;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.ssd-reset-filters:hover {
+    background: #e0e0e0;
+}
+
+/* ==========================================================================
+   Results Header
+   ========================================================================== */
+.ssd-results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px 0;
+}
+
+.ssd-results-info {
+    font-size: 16px;
+    color: #555;
+}
+
+.ssd-results-count {
+    font-weight: 600;
+}
+
+.ssd-results-controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.ssd-sort-select {
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.ssd-view-toggle {
+    display: flex;
+    gap: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.ssd-view-btn {
+    background: #fff;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.ssd-view-btn:hover {
+    background: #f0f0f0;
+}
+
+.ssd-view-btn.active {
+    background: #0073aa;
+    color: #fff;
+}
+
+.ssd-view-btn .dashicons {
+    font-size: 20px;
+}
+
+/* ==========================================================================
+   Loading Overlay
+   ========================================================================== */
+.ssd-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.ssd-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #0073aa;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   Providers Grid View
+   ========================================================================== */
+.ssd-providers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+/* ==========================================================================
+   Providers List View
+   ========================================================================== */
+.ssd-providers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.ssd-providers-list .ssd-provider-card {
+    display: flex;
+    flex-direction: row;
+}
+
+.ssd-providers-list .ssd-provider-thumbnail {
+    flex: 0 0 250px;
+    height: 200px;
+}
+
+.ssd-providers-list .ssd-provider-content {
+    flex: 1;
+}
+
+/* ==========================================================================
+   Provider Card
+   ========================================================================== */
+.ssd-provider-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+.ssd-provider-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.ssd-provider-thumbnail {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    background: #f5f5f5;
+}
+
+.ssd-provider-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.ssd-provider-card:hover .ssd-provider-thumbnail img {
+    transform: scale(1.05);
+}
+
+.ssd-no-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.ssd-no-image .dashicons {
+    font-size: 60px;
+    color: rgba(255,255,255,0.3);
+}
+
+.ssd-favorite-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.ssd-favorite-btn:hover {
+    background: #fff;
+    transform: scale(1.1);
+}
+
+.ssd-favorite-btn.favorited .dashicons {
+    color: #e74c3c;
+}
+
+.ssd-favorite-btn .dashicons {
+    font-size: 20px;
+    color: #999;
+    transition: color 0.3s;
+}
+
+.ssd-provider-content {
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.ssd-provider-title {
+    margin: 0 0 10px;
+    font-size: 18px;
+    line-height: 1.4;
+}
+
+.ssd-provider-title a {
+    color: #333;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.ssd-provider-title a:hover {
+    color: #0073aa;
+}
+
+/* ==========================================================================
+   Rating Stars
+   ========================================================================== */
+.ssd-provider-rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.ssd-stars {
+    display: flex;
+    gap: 2px;
+}
+
+.ssd-stars .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.ssd-stars .dashicons-star-filled {
+    color: #f39c12;
+}
+
+.ssd-stars .dashicons-star-half {
+    color: #f39c12;
+}
+
+.ssd-stars .dashicons-star-empty {
+    color: #ddd;
+}
+
+.ssd-rating-text {
+    font-size: 14px;
+    color: #666;
+}
+
+/* ==========================================================================
+   Provider Info
+   ========================================================================== */
+.ssd-provider-location {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 10px;
+    color: #666;
+    font-size: 14px;
+}
+
+.ssd-provider-location .dashicons {
+    font-size: 18px;
+    color: #0073aa;
+}
+
+.ssd-provider-services {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.ssd-service-badge {
+    background: #e8f4f8;
+    color: #0073aa;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.ssd-more-services {
+    background: #f0f0f0;
+    color: #666;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.ssd-provider-address {
+    margin-bottom: 15px;
+    color: #888;
+    font-size: 13px;
+}
+
+.ssd-provider-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: auto;
+}
+
+.ssd-provider-actions .button {
+    flex: 1;
+    text-align: center;
+    padding: 10px 15px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.ssd-view-details {
+    background: #0073aa;
+    color: #fff;
+    border: none;
+}
+
+.ssd-view-details:hover {
+    background: #005a87;
+    color: #fff;
+}
+
+.ssd-call-btn {
+    background: #27ae60;
+    color: #fff;
+    border: none;
+    flex: 0 0 auto;
+    padding: 10px 15px;
+}
+
+.ssd-call-btn:hover {
+    background: #229954;
+}
+
+.ssd-call-btn .dashicons {
+    font-size: 18px;
+}
+
+/* ==========================================================================
+   No Results
+   ========================================================================== */
+.ssd-no-results {
+    text-align: center;
+    padding: 60px 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    grid-column: 1 / -1;
+}
+
+.ssd-no-results .dashicons {
+    font-size: 60px;
+    color: #ddd;
+    margin-bottom: 15px;
+}
+
+.ssd-no-results p {
+    font-size: 16px;
+    color: #666;
+    margin: 0;
+}
+
+/* ==========================================================================
+   Pagination
+   ========================================================================== */
+.ssd-pagination {
+    text-align: center;
+    padding: 30px 0;
+}
+
+.ssd-load-more {
+    background: #0073aa;
+    color: #fff;
+    border: none;
+    padding: 12px 40px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.ssd-load-more:hover {
+    background: #005a87;
+}
+
+.ssd-load-more:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+/* ==========================================================================
+   Responsive Design
+   ========================================================================== */
+@media (max-width: 768px) {
+    .ssd-directory-wrapper {
+        padding: 15px;
+    }
+    
+    .ssd-filters {
+        padding: 15px;
+    }
+    
+    .ssd-toggle-filters {
+        display: flex;
+        align-items: center;
+    }
+    
+    .ssd-filter-form {
+        display: none;
+    }
+    
+    .ssd-filter-row {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .ssd-results-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+    
+    .ssd-results-controls {
+        width: 100%;
+        flex-direction: column;
+    }
+    
+    .ssd-sort-select {
+        width: 100%;
+    }
+    
+    .ssd-providers-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .ssd-providers-list .ssd-provider-card {
+        flex-direction: column;
+    }
+    
+    .ssd-providers-list .ssd-provider-thumbnail {
+        flex: 0 0 auto;
+        width: 100%;
+    }
+    
+    .ssd-provider-actions {
+        flex-direction: column;
+    }
+    
+    .ssd-call-btn {
+        flex: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    .ssd-filters-header h2 {
+        font-size: 20px;
+    }
+    
+    .ssd-provider-title {
+        font-size: 16px;
+    }
+    
+    .ssd-service-badge {
+        font-size: 11px;
+        padding: 4px 10px;
+    }
+}
