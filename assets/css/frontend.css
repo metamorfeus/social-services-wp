@@ -896,3 +896,30 @@
     color: #fff !important;
     border-color: #27ae60 !important;
 }
+
+/* ── Service tag links ───────────────────────────────────────────────────── */
+
+a.ssd-service-badge-large.ssd-service-tag-link,
+a.ssd-service-tag-link {
+    display: inline-block;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, transform 0.15s;
+}
+
+a.ssd-service-badge-large.ssd-service-tag-link:hover {
+    background: #0073aa;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+a.ssd-service-inline-link {
+    color: #0073aa;
+    text-decoration: none;
+    border-bottom: 1px dotted #0073aa;
+}
+
+a.ssd-service-inline-link:hover {
+    color: #005177;
+    border-bottom-style: solid;
+}

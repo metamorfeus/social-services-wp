@@ -251,6 +251,7 @@ class SSD_Import {
 
     private function normalize_headers($headers) {
         $aliases = array(
+            // Bulgarian column names (raw XLSX export)
             'Доставчик'                               => 'provider_name',
             'ЕИК'                                     => 'eik',
             'Община'                                  => 'municipality',
@@ -265,6 +266,16 @@ class SSD_Import {
             'Подновен лиценз № и дата'                => 'license_renewed_number',
             'Подновен лиценз - дата валидност'        => 'license_renewed_validity',
             'Установени нарушения'                    => 'violations',
+            // English column names used by older/alternative export scripts
+            'license_original_number'                 => 'license_number',
+            'license_original_validity'               => 'license_validity',
+            // _validity_date columns (parsed ISO dates) — ignored to avoid
+            // overwriting the raw-text validity already mapped above
+            'license_original_validity_date'          => '_skip',
+            'license_modified_validity_date'          => '_skip',
+            'license_renewed_validity_date'           => '_skip',
+            // row_number column present in some exports — ignore
+            'row_number'                              => '_skip',
         );
 
         return array_map(function ($h) use ($aliases) {

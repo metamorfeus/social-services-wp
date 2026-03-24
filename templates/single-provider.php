@@ -44,6 +44,23 @@ $municipality = wp_get_post_terms($provider_id, 'ssd_municipality');
 $services = wp_get_post_terms($provider_id, 'ssd_service_type');
 $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
 
+// Helper: find the URL of the [ssd_directory] page (cached per request)
+function ssd_get_directory_url() {
+    $url = wp_cache_get('ssd_directory_url', 'ssd');
+    if ($url === false) {
+        global $wpdb;
+        $page_id = $wpdb->get_var(
+            "SELECT ID FROM {$wpdb->posts}
+             WHERE post_content LIKE '%[ssd_directory%'
+             AND post_status = 'publish'
+             LIMIT 1"
+        );
+        $url = $page_id ? get_permalink((int) $page_id) : '';
+        wp_cache_set('ssd_directory_url', $url ?: 'none', 'ssd');
+    }
+    return ($url === 'none') ? '' : $url;
+}
+
 // Helper: parse Bulgarian date strings like "26.01.2026 г." into a timestamp
 function ssd_parse_date_str($date_str) {
     if (empty($date_str)) return false;
@@ -124,8 +141,18 @@ function ssd_parse_date_str($date_str) {
                 <!-- Service Badges -->
                 <?php if ($services): ?>
                     <div class="ssd-provider-services-large">
-                        <?php foreach ($services as $service): ?>
-                            <span class="ssd-service-badge-large"><?php echo esc_html($service->name); ?></span>
+                        <?php
+                        $dir_url = ssd_get_directory_url();
+                        foreach ($services as $service):
+                            $tag_url = $dir_url ? add_query_arg('service', $service->slug, $dir_url) : '';
+                        ?>
+                            <?php if ($tag_url): ?>
+                                <a href="<?php echo esc_url($tag_url); ?>" class="ssd-service-badge-large ssd-service-tag-link">
+                                    <?php echo esc_html($service->name); ?>
+                                </a>
+                            <?php else: ?>
+                                <span class="ssd-service-badge-large"><?php echo esc_html($service->name); ?></span>
+                            <?php endif; ?>
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
@@ -227,8 +254,17 @@ function ssd_parse_date_str($date_str) {
                         <span class="ssd-detail-value">
                             <?php if ($services): ?>
                                 <?php
-                                $service_names = array_map(function($s) { return $s->name; }, $services);
-                                echo esc_html(implode(', ', $service_names));
+                                $dir_url = ssd_get_directory_url();
+                                $parts = array();
+                                foreach ($services as $svc) {
+                                    $tag_url = $dir_url ? add_query_arg('service', $svc->slug, $dir_url) : '';
+                                    if ($tag_url) {
+                                        $parts[] = '<a href="' . esc_url($tag_url) . '" class="ssd-service-inline-link">' . esc_html($svc->name) . '</a>';
+                                    } else {
+                                        $parts[] = esc_html($svc->name);
+                                    }
+                                }
+                                echo implode(', ', $parts);
                                 ?>
                             <?php else: ?>
                                 -
