@@ -261,4 +261,3 @@ class SSD_Frontend {
         return $output;
     }
 }
-                                      
