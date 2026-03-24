@@ -220,6 +220,33 @@ class SSD_Import {
         <?php
     }
 
+    // ── Auto-detect CSV delimiter ────────────────────────────────────────────
+
+    /**
+     * Reads the first line of the file (after optional BOM) and returns the
+     * most-likely delimiter: comma, semicolon, or tab.
+     */
+    private function detect_delimiter($file_path, $has_bom) {
+        $handle = fopen($file_path, 'r');
+        if ($has_bom) {
+            fread($handle, 3);
+        }
+        $first_line = fgets($handle);
+        fclose($handle);
+
+        if ($first_line === false) {
+            return ',';
+        }
+
+        $counts = array(
+            ','  => substr_count($first_line, ','),
+            ';'  => substr_count($first_line, ';'),
+            "\t" => substr_count($first_line, "\t"),
+        );
+        arsort($counts);
+        return key($counts);
+    }
+
     // ── Normalise column headers (Bulgarian → English) ────────────────────────
 
     private function normalize_headers($headers) {
@@ -282,20 +309,31 @@ class SSD_Import {
             return;
         }
 
+        // Strip UTF-8 BOM if present (must check before detect_delimiter)
         $handle = fopen($dest, 'r');
         if (!$handle) {
             @unlink($dest);
             wp_send_json_error(array('message' => __('Could not open the CSV file for reading.', 'social-services-directory')));
             return;
         }
-
-        // Strip UTF-8 BOM if present
         $bom = fread($handle, 3);
-        if ($bom !== "\xEF\xBB\xBF") {
-            rewind($handle);
+        $has_bom = ($bom === "\xEF\xBB\xBF");
+        fclose($handle);
+
+        // Auto-detect delimiter (comma vs semicolon vs tab)
+        $delimiter = $this->detect_delimiter($dest, $has_bom);
+
+        $handle = fopen($dest, 'r');
+        if (!$handle) {
+            @unlink($dest);
+            wp_send_json_error(array('message' => __('Could not open the CSV file for reading.', 'social-services-directory')));
+            return;
+        }
+        if ($has_bom) {
+            fread($handle, 3);
         }
 
-        $raw_headers = fgetcsv($handle);
+        $raw_headers = fgetcsv($handle, 0, $delimiter);
         if (!$raw_headers) {
             fclose($handle);
             @unlink($dest);
@@ -308,12 +346,16 @@ class SSD_Import {
         if (!in_array('provider_name', $headers, true)) {
             fclose($handle);
             @unlink($dest);
-            wp_send_json_error(array('message' => __('Invalid CSV format. The file must have a "provider_name" (or "Доставчик") column.', 'social-services-directory')));
+            wp_send_json_error(array('message' => sprintf(
+                __('Invalid CSV format. Could not find a "provider_name" or "Доставчик" column. Detected delimiter: "%s". Headers found: %s', 'social-services-directory'),
+                $delimiter === "\t" ? 'TAB' : $delimiter,
+                implode(', ', array_slice($raw_headers, 0, 5))
+            )));
             return;
         }
 
         $total = 0;
-        while (fgetcsv($handle) !== false) {
+        while (fgetcsv($handle, 0, $delimiter) !== false) {
             $total++;
         }
         fclose($handle);
@@ -333,7 +375,8 @@ class SSD_Import {
             'total'           => $total,
             'batch_size'      => $batch_size,
             'update_existing' => $update_existing,
-            'has_bom'         => ($bom === "\xEF\xBB\xBF"),
+            'has_bom'         => $has_bom,
+            'delimiter'       => $delimiter,
         ), 2 * HOUR_IN_SECONDS);
 
         wp_send_json_success(array(
@@ -373,6 +416,7 @@ class SSD_Import {
         $update_existing = $session['update_existing'];
         $total           = $session['total'];
         $has_bom         = $session['has_bom'];
+        $delimiter       = isset($session['delimiter']) ? $session['delimiter'] : ',';
 
         if (!file_exists($file)) {
             delete_transient('ssd_import_' . $session_id);
@@ -386,37 +430,37 @@ class SSD_Import {
         if ($has_bom) {
             fread($handle, 3);
         }
-        fgetcsv($handle); // skip header row
+        fgetcsv($handle, 0, $delimiter); // skip header row
 
         // Seek to the correct offset
         $current = 0;
-        while ($current < $offset && fgetcsv($handle) !== false) {
+        while ($current < $offset && fgetcsv($handle, 0, $delimiter) !== false) {
             $current++;
         }
 
-        $imported  = 0;
-        $merged    = 0;
-        $skipped   = 0;
-        $errors    = array();
-        $skips     = array();
-        $processed = 0;
+        $imported     = 0;
+        $merged       = 0;
+        $skipped      = 0;
+        $errors       = array();
+        $skips        = array();
+        $processed    = 0;
+        $header_count = count($headers);
 
-        while ($processed < $batch_size && ($raw = fgetcsv($handle)) !== false) {
+        while ($processed < $batch_size && ($raw = fgetcsv($handle, 0, $delimiter)) !== false) {
             $row_num = $offset + $processed + 2; // +1 header, +1 for 1-based display
 
-            if (count($raw) !== count($headers)) {
-                $skipped++;
-                $skips[] = array(
-                    'row'     => $row_num,
-                    'name'    => '',
-                    'message' => sprintf(
-                        __('Column count mismatch: expected %d, got %d.', 'social-services-directory'),
-                        count($headers),
-                        count($raw)
-                    ),
-                );
+            // Skip truly empty rows
+            if ($raw === array(null) || (count($raw) === 1 && trim($raw[0]) === '')) {
                 $processed++;
                 continue;
+            }
+
+            // Pad short rows / truncate long rows so array_combine always works
+            $raw_count = count($raw);
+            if ($raw_count < $header_count) {
+                $raw = array_pad($raw, $header_count, '');
+            } elseif ($raw_count > $header_count) {
+                $raw = array_slice($raw, 0, $header_count);
             }
 
             $row    = array_combine($headers, $raw);

@@ -8,17 +8,23 @@
 
 ### Step 1: Install Plugin (2 minutes)
 
+> ⚠️ **Updating from a previous version?** Remove the old plugin completely before installing the new one:
+> 1. Go to **WordPress admin > Plugins**
+> 2. Click **Deactivate** under "Social Services Directory"
+> 3. Click **Delete** and confirm — this removes all plugin files
+> 4. Then proceed with the installation below
+>
+> *Your imported provider data, reviews, photos and settings are stored in the database and are NOT affected by deleting the plugin files.*
+
 1. **Download the plugin**
-   - You have the complete plugin folder: `social-services-directory`
+   - Use the `social-services-directory.zip` file provided
 
 2. **Upload to WordPress**
-   - Compress the folder to `social-services-directory.zip`
-   - Or manually copy to `/wp-content/plugins/`
+   - Go to **Plugins > Add New > Upload Plugin**
+   - Choose `social-services-directory.zip` and click **Install Now**
 
 3. **Activate**
-   - Go to WordPress admin > Plugins
-   - Find "Social Services Directory"
-   - Click "Activate"
+   - Click **Activate Plugin** after installation completes
 
 ### Step 2: Import Your Data (2 minutes)
 
