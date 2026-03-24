@@ -30,9 +30,12 @@ $license_number = get_post_meta($provider_id, '_ssd_license_number', true);
 $license_date = get_post_meta($provider_id, '_ssd_license_date', true);
 $license_validity = get_post_meta($provider_id, '_ssd_license_validity', true);
 
-$license_modified_number = get_post_meta($provider_id, '_ssd_license_modified_number', true);
-$license_modified_date = get_post_meta($provider_id, '_ssd_license_modified_date', true);
+$license_modified_number   = get_post_meta($provider_id, '_ssd_license_modified_number', true);
+$license_modified_date     = get_post_meta($provider_id, '_ssd_license_modified_date', true);
 $license_modified_validity = get_post_meta($provider_id, '_ssd_license_modified_validity', true);
+
+$license_renewed_number   = get_post_meta($provider_id, '_ssd_license_renewed_number', true);
+$license_renewed_validity = get_post_meta($provider_id, '_ssd_license_renewed_validity', true);
 
 $violations = get_post_meta($provider_id, '_ssd_violations', true);
 
@@ -258,8 +261,42 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
                         </div>
                     </div>
                 <?php endif; ?>
+
+                <!-- Renewed License -->
+                <?php if ($license_renewed_number): ?>
+                    <div class="ssd-license-block">
+                        <h3 class="ssd-license-subtitle"><?php _e('Подновен лиценз', 'social-services-directory'); ?></h3>
+                        <div class="ssd-details-grid">
+                            <div class="ssd-detail-item">
+                                <span class="ssd-detail-label"><?php _e('Номер и дата на издаване:', 'social-services-directory'); ?></span>
+                                <span class="ssd-detail-value"><?php echo esc_html($license_renewed_number); ?></span>
+                            </div>
+
+                            <div class="ssd-detail-item">
+                                <span class="ssd-detail-label"><?php _e('Дата на валидност:', 'social-services-directory'); ?></span>
+                                <span class="ssd-detail-value">
+                                    <?php
+                                    if ($license_renewed_validity) {
+                                        $validity_date = strtotime($license_renewed_validity);
+                                        if ($validity_date) {
+                                            echo esc_html(date('d.m.Y', $validity_date));
+                                            if ($validity_date < time()) {
+                                                echo ' <span class="ssd-expired-badge">' . esc_html__('Изтекъл', 'social-services-directory') . '</span>';
+                                            }
+                                        } else {
+                                            echo esc_html($license_renewed_validity);
+                                        }
+                                    } else {
+                                        echo '-';
+                                    }
+                                    ?>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
-            
+
             <!-- Contact Information -->
             <div class="ssd-details-section">
                 <h2 class="ssd-section-title"><?php _e('Контактна информация', 'social-services-directory'); ?></h2>

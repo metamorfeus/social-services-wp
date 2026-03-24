@@ -145,12 +145,17 @@ class SSD_Import {
                         <li><code>municipality</code> - <?php _e('Municipality name', 'social-services-directory'); ?></li>
                         <li><code>settlement</code> - <?php _e('Settlement/city', 'social-services-directory'); ?></li>
                         <li><code>address</code> - <?php _e('Full address', 'social-services-directory'); ?></li>
-                        <li><code>social_service</code> - <?php _e('Service type', 'social-services-directory'); ?></li>
+                        <li><code>social_service</code> - <?php _e('Service type — use semicolons to separate multiple values', 'social-services-directory'); ?></li>
                         <li><code>target_group</code> - <?php _e('Target group description', 'social-services-directory'); ?></li>
                         <li><code>phone</code> - <?php _e('Contact phone', 'social-services-directory'); ?></li>
                         <li><code>email</code> - <?php _e('Contact email', 'social-services-directory'); ?></li>
-                        <li><code>license_number</code> - <?php _e('License number', 'social-services-directory'); ?></li>
-                        <li><code>license_validity_date</code> - <?php _e('License valid until (YYYY-MM-DD)', 'social-services-directory'); ?></li>
+                        <li><code>license_number</code> - <?php _e('License number and issue date', 'social-services-directory'); ?></li>
+                        <li><code>license_validity</code> - <?php _e('License valid until date', 'social-services-directory'); ?></li>
+                        <li><code>license_modified_number</code> - <?php _e('Modified license number and date (optional)', 'social-services-directory'); ?></li>
+                        <li><code>license_modified_validity</code> - <?php _e('Modified license valid until (optional)', 'social-services-directory'); ?></li>
+                        <li><code>license_renewed_number</code> - <?php _e('Renewed license number and date (optional)', 'social-services-directory'); ?></li>
+                        <li><code>license_renewed_validity</code> - <?php _e('Renewed license valid until (optional)', 'social-services-directory'); ?></li>
+                        <li><code>violations</code> - <?php _e('Registered violations (optional)', 'social-services-directory'); ?></li>
                     </ul>
                 </li>
                 <li><?php _e('Ensure the CSV file is UTF-8 encoded (especially for Bulgarian Cyrillic text).', 'social-services-directory'); ?></li>
@@ -301,38 +306,50 @@ class SSD_Import {
             throw new Exception($provider_id->get_error_message());
         }
         
-        // Save metadata
+        // Save metadata (single-value fields)
         $meta_fields = array(
             'eik', 'settlement', 'address', 'target_group',
             'phone', 'email', 'website', 'working_hours',
-            'license_number', 'license_date', 'license_validity', 'violations'
+            'license_number', 'license_date', 'license_validity',
+            'license_modified_number', 'license_modified_validity',
+            'license_renewed_number', 'license_renewed_validity',
+            'violations'
         );
-        
+
         foreach ($meta_fields as $field) {
-            if (isset($data[$field])) {
-                update_post_meta($provider_id, '_ssd_' . $field, sanitize_text_field($data[$field]));
+            if (isset($data[$field]) && $data[$field] !== '') {
+                update_post_meta($provider_id, '_ssd_' . $field, sanitize_textarea_field($data[$field]));
             }
         }
-        
-        // Set municipality
+
+        // Set municipality taxonomy
         if (!empty($data['municipality'])) {
-            $municipality = term_exists($data['municipality'], 'ssd_municipality');
+            $muni_name = sanitize_text_field(trim($data['municipality']));
+            $municipality = term_exists($muni_name, 'ssd_municipality');
             if (!$municipality) {
-                $municipality = wp_insert_term($data['municipality'], 'ssd_municipality');
+                $municipality = wp_insert_term($muni_name, 'ssd_municipality');
             }
             if (!is_wp_error($municipality)) {
-                wp_set_post_terms($provider_id, array($municipality['term_id']), 'ssd_municipality');
+                wp_set_post_terms($provider_id, array(intval($municipality['term_id'])), 'ssd_municipality');
             }
         }
-        
-        // Set service type
+
+        // Set service type taxonomy — supports semicolon-separated multiple values
         if (!empty($data['social_service'])) {
-            $service = term_exists($data['social_service'], 'ssd_service_type');
-            if (!$service) {
-                $service = wp_insert_term($data['social_service'], 'ssd_service_type');
+            $service_names = array_filter(array_map('trim', explode(';', $data['social_service'])));
+            $term_ids = array();
+            foreach ($service_names as $svc_name) {
+                $svc_name = sanitize_text_field($svc_name);
+                $term = term_exists($svc_name, 'ssd_service_type');
+                if (!$term) {
+                    $term = wp_insert_term($svc_name, 'ssd_service_type');
+                }
+                if (!is_wp_error($term)) {
+                    $term_ids[] = intval($term['term_id']);
+                }
             }
-            if (!is_wp_error($service)) {
-                wp_set_post_terms($provider_id, array($service['term_id']), 'ssd_service_type');
+            if (!empty($term_ids)) {
+                wp_set_post_terms($provider_id, $term_ids, 'ssd_service_type');
             }
         }
         
