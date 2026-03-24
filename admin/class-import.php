@@ -369,7 +369,12 @@ class SSD_Import {
         $batch_size      = max(1, intval($_POST['batch_size'] ?? 50));
         $update_existing = !empty($_POST['update_existing']);
 
-        set_transient('ssd_import_' . $session_id, array(
+        // Store session metadata in a JSON file next to the CSV.
+        // Using the filesystem avoids object-cache issues on hosts that do not
+        // persist the WordPress transient cache between requests (e.g. Redis/
+        // Memcached with no persistence, or LiteSpeed Cache on Hostinger).
+        $session_file = $upload_dir['basedir'] . '/ssd-import-' . $session_id . '.json';
+        $session_data = array(
             'file'            => $dest,
             'headers'         => $headers,
             'total'           => $total,
@@ -377,7 +382,8 @@ class SSD_Import {
             'update_existing' => $update_existing,
             'has_bom'         => $has_bom,
             'delimiter'       => $delimiter,
-        ), 2 * HOUR_IN_SECONDS);
+        );
+        file_put_contents($session_file, wp_json_encode($session_data));
 
         wp_send_json_success(array(
             'session_id' => $session_id,
@@ -404,9 +410,18 @@ class SSD_Import {
             return;
         }
 
-        $session = get_transient('ssd_import_' . $session_id);
-        if (!$session) {
+        $upload_dir   = wp_upload_dir();
+        $session_file = $upload_dir['basedir'] . '/ssd-import-' . $session_id . '.json';
+
+        if (!file_exists($session_file)) {
             wp_send_json_error(array('message' => __('Import session not found or expired. Please start the import again.', 'social-services-directory')));
+            return;
+        }
+
+        $session = json_decode(file_get_contents($session_file), true);
+        if (!$session) {
+            @unlink($session_file);
+            wp_send_json_error(array('message' => __('Import session data is corrupt. Please start the import again.', 'social-services-directory')));
             return;
         }
 
@@ -419,7 +434,7 @@ class SSD_Import {
         $delimiter       = isset($session['delimiter']) ? $session['delimiter'] : ',';
 
         if (!file_exists($file)) {
-            delete_transient('ssd_import_' . $session_id);
+            @unlink($session_file);
             wp_send_json_error(array('message' => __('Import file not found on disk.', 'social-services-directory')));
             return;
         }
@@ -496,7 +511,7 @@ class SSD_Import {
 
         if ($done) {
             @unlink($file);
-            delete_transient('ssd_import_' . $session_id);
+            @unlink($session_file);
         }
 
         wp_send_json_success(array(
