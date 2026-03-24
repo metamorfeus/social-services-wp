@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: Social Services Directory
- * Plugin URI: https://example.com/social-services-directory
+ * Plugin URI: https://metamorfeus.com
  * Description: A comprehensive directory plugin for social service providers with filtering by location, services, ratings, and photo galleries.
  * Version: 1.0.0
- * Author: Your Name
- * Author URI: https://example.com
+ * Author: Metamorfeus
+ * Author URI: https://metamorfeus.com
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: social-services-directory
