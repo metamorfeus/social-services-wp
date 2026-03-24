@@ -93,6 +93,126 @@
     border: 1px solid #e0e0e0;
 }
 
+/* ── Import: progress bar ────────────────────────────────────────────────── */
+
+.ssd-progress-bar-wrap {
+    background: #e5e5e5;
+    border-radius: 6px;
+    height: 22px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.ssd-progress-bar {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #0073aa, #00a0d2);
+    border-radius: 6px;
+    transition: width 0.4s ease;
+}
+
+.ssd-progress-text {
+    font-size: 13px;
+    color: #555;
+    margin: 0 0 18px;
+}
+
+/* ── Import: live counters ───────────────────────────────────────────────── */
+
+.ssd-counters {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.ssd-counter {
+    flex: 1 1 100px;
+    text-align: center;
+    padding: 14px 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+}
+
+.ssd-counter-value {
+    display: block;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 6px;
+}
+
+.ssd-counter-label {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #777;
+}
+
+.ssd-counter-created  { border-color: #46b450; }
+.ssd-counter-created  .ssd-counter-value { color: #2e7d32; }
+
+.ssd-counter-updated  { border-color: #0073aa; }
+.ssd-counter-updated  .ssd-counter-value { color: #0073aa; }
+
+.ssd-counter-skipped  { border-color: #f0b849; }
+.ssd-counter-skipped  .ssd-counter-value { color: #a07000; }
+
+.ssd-counter-error    { border-color: #dc3232; }
+.ssd-counter-error    .ssd-counter-value { color: #c0392b; }
+
+/* ── Import: results table ───────────────────────────────────────────────── */
+
+.ssd-results-table td:first-child {
+    width: 60%;
+}
+
+.ssd-row-created strong { color: #2e7d32; }
+.ssd-row-updated strong { color: #0073aa; }
+.ssd-row-skipped strong { color: #a07000; }
+.ssd-row-errors  strong { color: #c0392b; }
+
+/* ── Import: error / skipped lists ──────────────────────────────────────── */
+
+.ssd-error-list {
+    max-height: 280px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 4px 0;
+    background: #fff;
+    font-size: 13px;
+}
+
+.ssd-error-row {
+    padding: 7px 12px;
+    border-bottom: 1px solid #f0f0f0;
+    line-height: 1.5;
+}
+
+.ssd-error-row:last-child {
+    border-bottom: none;
+}
+
+.ssd-err-row-num {
+    font-weight: 600;
+    color: #555;
+    margin-right: 4px;
+}
+
+.ssd-err-name {
+    font-weight: 600;
+}
+
+.ssd-err-msg {
+    color: #c0392b;
+}
+
+.ssd-skip-row .ssd-err-msg {
+    color: #a07000;
+}
+
 /* ── Stats table ────────────────────────────────────────────────────────── */
 
 .widefat td strong {
