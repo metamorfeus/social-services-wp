@@ -200,9 +200,10 @@ class Social_Services_Directory {
      * Enqueue admin assets
      */
     public function enqueue_admin_assets($hook) {
-        // Only load on plugin pages
-        if (strpos($hook, 'social-services') === false && 
-            get_post_type() !== 'ssd_provider') {
+        // Only load on plugin pages.
+        // All our page slugs contain 'ssd' (ssd-import, ssd-reviews, ssd-settings, ssd-stats).
+        // Editing an ssd_provider post uses get_post_type(), not the hook name.
+        if (strpos($hook, 'ssd') === false && get_post_type() !== 'ssd_provider') {
             return;
         }
         
