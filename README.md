@@ -1,6 +1,6 @@
 # Social Services Directory - WordPress Plugin
 
-Developed by **[Metamorfeus](https://metamorfeus.com)** — a digital agency specialising in custom WordPress development, web design, and digital transformation for organisations across Bulgaria.
+Developed by **[Metamorfeus](https://metamorfeus.com)** — a technology firm specialising in AI automation and cybersecurity solutions, helping organisations enhance their competitiveness through generative AI technologies and enterprise-grade security.
 
 ---
 
