@@ -162,6 +162,9 @@
 .ssd-counter-error    { border-color: #dc3232; }
 .ssd-counter-error    .ssd-counter-value { color: #c0392b; }
 
+.ssd-counter-merged   { border-color: #8e44ad; }
+.ssd-counter-merged   .ssd-counter-value { color: #8e44ad; }
+
 /* ── Import: results table ───────────────────────────────────────────────── */
 
 .ssd-results-table td:first-child {
@@ -172,6 +175,7 @@
 .ssd-row-updated strong { color: #0073aa; }
 .ssd-row-skipped strong { color: #a07000; }
 .ssd-row-errors  strong { color: #c0392b; }
+.ssd-row-merged  strong { color: #8e44ad; }
 
 /* ── Import: error / skipped lists ──────────────────────────────────────── */
 

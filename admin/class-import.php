@@ -49,7 +49,7 @@ class SSD_Import {
             <h1><?php _e('Import Service Providers', 'social-services-directory'); ?></h1>
 
             <div class="notice notice-info">
-                <p><?php _e('Import providers from a UTF-8 encoded CSV file. The import runs in batches — you can watch live progress below.', 'social-services-directory'); ?></p>
+                <p><?php _e('Import providers from a UTF-8 encoded CSV file. Both English and Bulgarian column headers are supported. The import runs in batches — you can watch live progress below.', 'social-services-directory'); ?></p>
             </div>
 
             <!-- Upload form -->
@@ -64,14 +64,14 @@ class SSD_Import {
                             <th><label for="csv_file"><?php _e('CSV File', 'social-services-directory'); ?></label></th>
                             <td>
                                 <input type="file" id="csv_file" name="csv_file" accept=".csv" required>
-                                <p class="description"><?php _e('Select the CSV file exported from your database. Must be UTF-8 encoded.', 'social-services-directory'); ?></p>
+                                <p class="description"><?php _e('Select the CSV file. Must be UTF-8 encoded. Both the plugin\'s processed CSV and raw XLSX exports are accepted.', 'social-services-directory'); ?></p>
                             </td>
                         </tr>
                         <tr>
                             <th><label for="batch_size"><?php _e('Batch Size', 'social-services-directory'); ?></label></th>
                             <td>
                                 <input type="number" id="batch_size" name="batch_size" value="50" min="1" max="500" class="small-text">
-                                <p class="description"><?php _e('Records processed per request. Lower values use less memory. 50 is recommended.', 'social-services-directory'); ?></p>
+                                <p class="description"><?php _e('Records processed per request. 50 is recommended.', 'social-services-directory'); ?></p>
                             </td>
                         </tr>
                         <tr>
@@ -79,9 +79,9 @@ class SSD_Import {
                             <td>
                                 <label>
                                     <input type="checkbox" id="update_existing" name="update_existing" value="1">
-                                    <?php _e('Update existing providers (matched by EIK)', 'social-services-directory'); ?>
+                                    <?php _e('Update meta fields on existing providers (matched by EIK)', 'social-services-directory'); ?>
                                 </label>
-                                <p class="description"><?php _e('If unchecked, providers already in the database will be skipped.', 'social-services-directory'); ?></p>
+                                <p class="description"><?php _e('When a provider is found by EIK, new services are always merged. Tick this to also refresh contact details, address and licence fields.', 'social-services-directory'); ?></p>
                             </td>
                         </tr>
                     </table>
@@ -110,9 +110,9 @@ class SSD_Import {
                         <span class="ssd-counter-value" id="cnt-created">0</span>
                         <span class="ssd-counter-label"><?php _e('Created', 'social-services-directory'); ?></span>
                     </div>
-                    <div class="ssd-counter ssd-counter-updated">
-                        <span class="ssd-counter-value" id="cnt-updated">0</span>
-                        <span class="ssd-counter-label"><?php _e('Updated', 'social-services-directory'); ?></span>
+                    <div class="ssd-counter ssd-counter-merged">
+                        <span class="ssd-counter-value" id="cnt-merged">0</span>
+                        <span class="ssd-counter-label"><?php _e('Merged', 'social-services-directory'); ?></span>
                     </div>
                     <div class="ssd-counter ssd-counter-skipped">
                         <span class="ssd-counter-value" id="cnt-skipped">0</span>
@@ -136,12 +136,12 @@ class SSD_Import {
                             <td><strong id="res-total">—</strong></td>
                         </tr>
                         <tr class="ssd-row-created">
-                            <td><?php _e('Providers created', 'social-services-directory'); ?></td>
+                            <td><?php _e('Providers created (new)', 'social-services-directory'); ?></td>
                             <td><strong id="res-created">—</strong></td>
                         </tr>
-                        <tr class="ssd-row-updated">
-                            <td><?php _e('Providers updated', 'social-services-directory'); ?></td>
-                            <td><strong id="res-updated">—</strong></td>
+                        <tr class="ssd-row-merged">
+                            <td><?php _e('Providers merged (new services added to existing record)', 'social-services-directory'); ?></td>
+                            <td><strong id="res-merged">—</strong></td>
                         </tr>
                         <tr class="ssd-row-skipped">
                             <td><?php _e('Rows skipped', 'social-services-directory'); ?></td>
@@ -154,14 +154,14 @@ class SSD_Import {
                     </tbody>
                 </table>
 
-                <!-- Error details (hidden when no errors) -->
+                <!-- Error details -->
                 <div id="ssd-error-details" style="display:none; margin-top:20px;">
                     <h3><?php _e('Error Details', 'social-services-directory'); ?></h3>
                     <p class="description"><?php _e('The following rows could not be imported:', 'social-services-directory'); ?></p>
                     <div class="ssd-error-list" id="ssd-error-list"></div>
                 </div>
 
-                <!-- Skipped details (hidden when no skips) -->
+                <!-- Skipped details -->
                 <div id="ssd-skipped-details" style="display:none; margin-top:16px;">
                     <h3><?php _e('Skipped Rows', 'social-services-directory'); ?></h3>
                     <p class="description"><?php _e('The following rows were skipped:', 'social-services-directory'); ?></p>
@@ -186,47 +186,68 @@ class SSD_Import {
         ?>
         <div class="ssd-import-instructions">
             <h3><?php _e('CSV Column Reference', 'social-services-directory'); ?></h3>
-            <table class="widefat striped" style="max-width:700px;">
+            <p><?php _e('Both English column names (plugin CSV) and Bulgarian column names (raw XLSX export) are accepted.', 'social-services-directory'); ?></p>
+            <table class="widefat striped" style="max-width:800px;">
                 <thead>
                     <tr>
-                        <th><?php _e('Column name', 'social-services-directory'); ?></th>
-                        <th><?php _e('Description', 'social-services-directory'); ?></th>
+                        <th><?php _e('English column name', 'social-services-directory'); ?></th>
+                        <th><?php _e('Bulgarian column name (XLSX)', 'social-services-directory'); ?></th>
                         <th><?php _e('Required', 'social-services-directory'); ?></th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>provider_name</code></td><td><?php _e('Provider name', 'social-services-directory'); ?></td><td><?php _e('Yes', 'social-services-directory'); ?></td></tr>
-                    <tr><td><code>eik</code></td><td><?php _e('Unified Identification Code', 'social-services-directory'); ?></td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
-                    <tr><td><code>municipality</code></td><td><?php _e('Municipality name', 'social-services-directory'); ?></td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
-                    <tr><td><code>settlement</code></td><td><?php _e('Settlement / city', 'social-services-directory'); ?></td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
-                    <tr><td><code>address</code></td><td><?php _e('Full address', 'social-services-directory'); ?></td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
-                    <tr><td><code>social_service</code></td><td><?php _e('Service type — separate multiple values with semicolons', 'social-services-directory'); ?></td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
-                    <tr><td><code>target_group</code></td><td><?php _e('Target group description', 'social-services-directory'); ?></td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
-                    <tr><td><code>phone</code></td><td><?php _e('Contact phone', 'social-services-directory'); ?></td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
-                    <tr><td><code>email</code></td><td><?php _e('Contact email', 'social-services-directory'); ?></td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
-                    <tr><td><code>license_number</code></td><td><?php _e('License number and date', 'social-services-directory'); ?></td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
-                    <tr><td><code>license_validity</code></td><td><?php _e('License valid until', 'social-services-directory'); ?></td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
-                    <tr><td><code>license_modified_number</code></td><td><?php _e('Modified licence number/date', 'social-services-directory'); ?></td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
-                    <tr><td><code>license_modified_validity</code></td><td><?php _e('Modified licence valid until', 'social-services-directory'); ?></td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
-                    <tr><td><code>license_renewed_number</code></td><td><?php _e('Renewed licence number/date', 'social-services-directory'); ?></td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
-                    <tr><td><code>license_renewed_validity</code></td><td><?php _e('Renewed licence valid until', 'social-services-directory'); ?></td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
-                    <tr><td><code>violations</code></td><td><?php _e('Registered violations', 'social-services-directory'); ?></td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
+                    <tr><td><code>provider_name</code></td><td>Доставчик</td><td><?php _e('Yes', 'social-services-directory'); ?></td></tr>
+                    <tr><td><code>eik</code></td><td>ЕИК</td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
+                    <tr><td><code>municipality</code></td><td>Община</td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
+                    <tr><td><code>settlement</code></td><td>Населено място</td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
+                    <tr><td><code>address</code></td><td>Седалище и адрес на управление</td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
+                    <tr><td><code>social_service</code></td><td>Социална услуга</td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
+                    <tr><td><code>target_group</code></td><td>Целева група</td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
+                    <tr><td><code>license_number</code></td><td>Лиценз - номер и дата на издаване</td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
+                    <tr><td><code>license_validity</code></td><td>Лиценз - дата на валидност</td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
+                    <tr><td><code>license_modified_number</code></td><td>Лиценз с промяна - номер и дата</td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
+                    <tr><td><code>license_modified_validity</code></td><td>Лиценз с промяна - дата валидност</td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
+                    <tr><td><code>license_renewed_number</code></td><td>Подновен лиценз № и дата</td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
+                    <tr><td><code>license_renewed_validity</code></td><td>Подновен лиценз - дата валидност</td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
+                    <tr><td><code>violations</code></td><td>Установени нарушения</td><td><?php _e('No', 'social-services-directory'); ?></td></tr>
                 </tbody>
             </table>
             <p style="margin-top:12px;">
-                <strong><?php _e('Note:', 'social-services-directory'); ?></strong>
-                <?php _e('The CSV must be UTF-8 encoded (with or without BOM). Large imports may take several minutes — do not close the browser window.', 'social-services-directory'); ?>
+                <strong><?php _e('Merge behaviour:', 'social-services-directory'); ?></strong>
+                <?php _e('When multiple rows share the same EIK, all their services are merged into one provider record. Duplicate services are ignored.', 'social-services-directory'); ?>
             </p>
         </div>
         <?php
     }
 
+    // ── Normalise column headers (Bulgarian → English) ────────────────────────
+
+    private function normalize_headers($headers) {
+        $aliases = array(
+            'Доставчик'                               => 'provider_name',
+            'ЕИК'                                     => 'eik',
+            'Община'                                  => 'municipality',
+            'Населено място'                          => 'settlement',
+            'Седалище и адрес на управление'          => 'address',
+            'Социална услуга'                         => 'social_service',
+            'Целева група'                            => 'target_group',
+            'Лиценз - номер и дата на издаване'       => 'license_number',
+            'Лиценз - дата на валидност'              => 'license_validity',
+            'Лиценз с промяна - номер и дата'         => 'license_modified_number',
+            'Лиценз с промяна - дата валидност'       => 'license_modified_validity',
+            'Подновен лиценз № и дата'                => 'license_renewed_number',
+            'Подновен лиценз - дата валидност'        => 'license_renewed_validity',
+            'Установени нарушения'                    => 'violations',
+        );
+
+        return array_map(function ($h) use ($aliases) {
+            $h = trim($h);
+            return isset($aliases[$h]) ? $aliases[$h] : $h;
+        }, $headers);
+    }
+
     // ── AJAX: Start import ────────────────────────────────────────────────────
 
-    /**
-     * Validate the uploaded file, move it to a temp location, count rows,
-     * store a session transient and return metadata to the JS client.
-     */
     public function ajax_import_start() {
         check_ajax_referer('ssd_import_csv', 'nonce');
 
@@ -252,7 +273,6 @@ class SSD_Import {
             return;
         }
 
-        // Move file to a persistent location for batch processing
         $upload_dir = wp_upload_dir();
         $session_id = wp_generate_uuid4();
         $dest       = $upload_dir['basedir'] . '/ssd-import-' . $session_id . '.csv';
@@ -262,7 +282,6 @@ class SSD_Import {
             return;
         }
 
-        // Read and validate headers
         $handle = fopen($dest, 'r');
         if (!$handle) {
             @unlink($dest);
@@ -276,15 +295,23 @@ class SSD_Import {
             rewind($handle);
         }
 
-        $headers = fgetcsv($handle);
-        if (!$headers || !in_array('provider_name', $headers, true)) {
+        $raw_headers = fgetcsv($handle);
+        if (!$raw_headers) {
             fclose($handle);
             @unlink($dest);
-            wp_send_json_error(array('message' => __('Invalid CSV format. The file must have a "provider_name" column in the header row.', 'social-services-directory')));
+            wp_send_json_error(array('message' => __('Could not read CSV headers.', 'social-services-directory')));
             return;
         }
 
-        // Count data rows
+        $headers = $this->normalize_headers($raw_headers);
+
+        if (!in_array('provider_name', $headers, true)) {
+            fclose($handle);
+            @unlink($dest);
+            wp_send_json_error(array('message' => __('Invalid CSV format. The file must have a "provider_name" (or "Доставчик") column.', 'social-services-directory')));
+            return;
+        }
+
         $total = 0;
         while (fgetcsv($handle) !== false) {
             $total++;
@@ -300,7 +327,6 @@ class SSD_Import {
         $batch_size      = max(1, intval($_POST['batch_size'] ?? 50));
         $update_existing = !empty($_POST['update_existing']);
 
-        // Persist session data for subsequent batch requests
         set_transient('ssd_import_' . $session_id, array(
             'file'            => $dest,
             'headers'         => $headers,
@@ -319,10 +345,6 @@ class SSD_Import {
 
     // ── AJAX: Process one batch ───────────────────────────────────────────────
 
-    /**
-     * Process a single batch of rows and return per-batch statistics.
-     * The JS accumulates totals across batches.
-     */
     public function ajax_import_batch() {
         check_ajax_referer('ssd_import_csv', 'nonce');
 
@@ -354,19 +376,16 @@ class SSD_Import {
 
         if (!file_exists($file)) {
             delete_transient('ssd_import_' . $session_id);
-            wp_send_json_error(array('message' => __('Import file not found on disk. The server may have cleaned it up.', 'social-services-directory')));
+            wp_send_json_error(array('message' => __('Import file not found on disk.', 'social-services-directory')));
             return;
         }
 
         set_time_limit(120);
 
         $handle = fopen($file, 'r');
-
-        // Skip BOM
         if ($has_bom) {
             fread($handle, 3);
         }
-
         fgetcsv($handle); // skip header row
 
         // Seek to the correct offset
@@ -376,7 +395,7 @@ class SSD_Import {
         }
 
         $imported  = 0;
-        $updated   = 0;
+        $merged    = 0;
         $skipped   = 0;
         $errors    = array();
         $skips     = array();
@@ -385,7 +404,6 @@ class SSD_Import {
         while ($processed < $batch_size && ($raw = fgetcsv($handle)) !== false) {
             $row_num = $offset + $processed + 2; // +1 header, +1 for 1-based display
 
-            // Column count mismatch → skip silently
             if (count($raw) !== count($headers)) {
                 $skipped++;
                 $skips[] = array(
@@ -405,12 +423,8 @@ class SSD_Import {
             $result = $this->import_provider($row, $update_existing);
 
             switch ($result['action']) {
-                case 'created':
-                    $imported++;
-                    break;
-                case 'updated':
-                    $updated++;
-                    break;
+                case 'created': $imported++; break;
+                case 'merged':  $merged++;   break;
                 case 'skipped':
                     $skipped++;
                     $skips[] = array(
@@ -436,7 +450,6 @@ class SSD_Import {
         $new_offset = $offset + $processed;
         $done       = $new_offset >= $total;
 
-        // Cleanup temp file when fully done
         if ($done) {
             @unlink($file);
             delete_transient('ssd_import_' . $session_id);
@@ -445,7 +458,7 @@ class SSD_Import {
         wp_send_json_success(array(
             'processed' => $processed,
             'imported'  => $imported,
-            'updated'   => $updated,
+            'merged'    => $merged,
             'skipped'   => $skipped,
             'errors'    => $errors,
             'skips'     => $skips,
@@ -458,8 +471,11 @@ class SSD_Import {
     // ── Import single provider ────────────────────────────────────────────────
 
     /**
-     * Returns array with keys: action (created|updated|skipped|error),
-     * provider_name, provider_id (on success), message (on skip/error).
+     * Returns: action (created|merged|skipped|error), provider_name, provider_id, message.
+     *
+     * Merge behaviour: when a provider is matched by EIK, new service types are
+     * always appended to the existing terms. Meta fields are updated only when
+     * $update_existing is true OR the meta field is currently empty.
      */
     private function import_provider($data, $update_existing = false) {
         $provider_name = sanitize_text_field($data['provider_name'] ?? '');
@@ -493,17 +509,81 @@ class SSD_Import {
             }
         }
 
-        // Skip if exists and update is disabled
-        if ($existing && !$update_existing) {
+        // ── Existing provider found — merge ───────────────────────────────────
+        if ($existing) {
+            $provider_id = $existing->ID;
+
+            // Update post title if update_existing
+            if ($update_existing) {
+                wp_update_post(array(
+                    'ID'           => $provider_id,
+                    'post_title'   => $provider_name,
+                    'post_content' => sanitize_textarea_field($data['description'] ?? ''),
+                ));
+            }
+
+            // Meta: update if update_existing OR field is currently empty
+            $meta_fields = array(
+                'eik', 'settlement', 'address', 'target_group',
+                'phone', 'email', 'website', 'working_hours',
+                'license_number', 'license_date', 'license_validity',
+                'license_modified_number', 'license_modified_validity',
+                'license_renewed_number', 'license_renewed_validity',
+                'violations',
+            );
+            foreach ($meta_fields as $field) {
+                if (!isset($data[$field]) || $data[$field] === '') {
+                    continue;
+                }
+                $current = get_post_meta($provider_id, '_ssd_' . $field, true);
+                if ($update_existing || empty($current)) {
+                    update_post_meta($provider_id, '_ssd_' . $field, sanitize_textarea_field($data[$field]));
+                }
+            }
+
+            // Municipality: update if empty OR update_existing
+            if (!empty($data['municipality'])) {
+                $existing_muni = wp_get_post_terms($provider_id, 'ssd_municipality');
+                if ($update_existing || empty($existing_muni) || is_wp_error($existing_muni)) {
+                    $muni_name    = sanitize_text_field(trim($data['municipality']));
+                    $municipality = term_exists($muni_name, 'ssd_municipality');
+                    if (!$municipality) {
+                        $municipality = wp_insert_term($muni_name, 'ssd_municipality');
+                    }
+                    if (!is_wp_error($municipality)) {
+                        wp_set_post_terms($provider_id, array(intval($municipality['term_id'])), 'ssd_municipality', false);
+                    }
+                }
+            }
+
+            // Services: ALWAYS append new ones (do not replace existing)
+            if (!empty($data['social_service'])) {
+                $service_names = array_filter(array_map('trim', explode(';', $data['social_service'])));
+                $new_term_ids  = array();
+                foreach ($service_names as $svc_name) {
+                    $svc_name = sanitize_text_field($svc_name);
+                    $term     = term_exists($svc_name, 'ssd_service_type');
+                    if (!$term) {
+                        $term = wp_insert_term($svc_name, 'ssd_service_type');
+                    }
+                    if (!is_wp_error($term)) {
+                        $new_term_ids[] = intval($term['term_id']);
+                    }
+                }
+                if (!empty($new_term_ids)) {
+                    // append=true keeps existing terms and adds new ones
+                    wp_set_post_terms($provider_id, $new_term_ids, 'ssd_service_type', true);
+                }
+            }
+
             return array(
-                'action'        => 'skipped',
+                'action'        => 'merged',
+                'provider_id'   => $provider_id,
                 'provider_name' => $provider_name,
-                'message'       => $eik
-                    ? sprintf(__('Already exists (EIK: %s). Update existing is disabled.', 'social-services-directory'), $eik)
-                    : __('Already exists. Update existing is disabled.', 'social-services-directory'),
             );
         }
 
+        // ── New provider — create ─────────────────────────────────────────────
         $post_data = array(
             'post_title'   => $provider_name,
             'post_type'    => 'ssd_provider',
@@ -511,14 +591,7 @@ class SSD_Import {
             'post_content' => sanitize_textarea_field($data['description'] ?? ''),
         );
 
-        if ($existing) {
-            $post_data['ID'] = $existing->ID;
-            $provider_id     = wp_update_post($post_data, true);
-            $action          = 'updated';
-        } else {
-            $provider_id = wp_insert_post($post_data, true);
-            $action      = 'created';
-        }
+        $provider_id = wp_insert_post($post_data, true);
 
         if (is_wp_error($provider_id)) {
             return array(
@@ -555,7 +628,7 @@ class SSD_Import {
             }
         }
 
-        // Service type taxonomy — supports semicolon-separated multiple values
+        // Service type taxonomy — semicolon-separated multiple values
         if (!empty($data['social_service'])) {
             $service_names = array_filter(array_map('trim', explode(';', $data['social_service'])));
             $term_ids      = array();
@@ -575,7 +648,7 @@ class SSD_Import {
         }
 
         return array(
-            'action'        => $action,
+            'action'        => 'created',
             'provider_id'   => $provider_id,
             'provider_name' => $provider_name,
         );

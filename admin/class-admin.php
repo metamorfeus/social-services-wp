@@ -48,6 +48,7 @@ class SSD_Admin {
         register_setting('ssd_settings_group', 'ssd_default_view');
         register_setting('ssd_settings_group', 'ssd_auto_approve_reviews');
         register_setting('ssd_settings_group', 'ssd_map_api_key');
+        register_setting('ssd_settings_group', 'ssd_grid_columns');
     }
     
     /**
@@ -61,7 +62,7 @@ class SSD_Admin {
         // Save settings
         if (isset($_POST['ssd_save_settings'])) {
             check_admin_referer('ssd_settings_nonce');
-            
+
             update_option('ssd_items_per_page', intval($_POST['ssd_items_per_page']));
             update_option('ssd_enable_reviews', isset($_POST['ssd_enable_reviews']));
             update_option('ssd_enable_photos', isset($_POST['ssd_enable_photos']));
@@ -69,6 +70,8 @@ class SSD_Admin {
             update_option('ssd_default_view', sanitize_text_field($_POST['ssd_default_view']));
             update_option('ssd_auto_approve_reviews', isset($_POST['ssd_auto_approve_reviews']));
             update_option('ssd_map_api_key', sanitize_text_field($_POST['ssd_map_api_key']));
+            $grid_cols = intval($_POST['ssd_grid_columns'] ?? 3);
+            update_option('ssd_grid_columns', max(1, min(6, $grid_cols)));
             
             echo '<div class="notice notice-success"><p>' . __('Settings saved successfully.', 'social-services-directory') . '</p></div>';
         }
@@ -79,7 +82,8 @@ class SSD_Admin {
         $enable_favorites = get_option('ssd_enable_favorites', true);
         $default_view = get_option('ssd_default_view', 'grid');
         $auto_approve = get_option('ssd_auto_approve_reviews', false);
-        $map_api_key = get_option('ssd_map_api_key', '');
+        $map_api_key   = get_option('ssd_map_api_key', '');
+        $grid_columns  = intval(get_option('ssd_grid_columns', 3));
         
         ?>
         <div class="wrap">
@@ -110,7 +114,21 @@ class SSD_Admin {
                             </select>
                         </td>
                     </tr>
-                    
+
+                    <tr>
+                        <th scope="row">
+                            <label for="ssd_grid_columns"><?php _e('Grid Columns', 'social-services-directory'); ?></label>
+                        </th>
+                        <td>
+                            <select id="ssd_grid_columns" name="ssd_grid_columns">
+                                <?php foreach (array(1, 2, 3, 4, 5, 6) as $c): ?>
+                                    <option value="<?php echo $c; ?>" <?php selected($grid_columns, $c); ?>><?php echo $c; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <p class="description"><?php _e('Number of provider cards per row in grid view. Default: 3.', 'social-services-directory'); ?></p>
+                        </td>
+                    </tr>
+
                     <tr>
                         <th scope="row"><?php _e('Enable Features', 'social-services-directory'); ?></th>
                         <td>

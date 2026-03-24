@@ -124,20 +124,6 @@ $target_groups = get_terms(array(
                     </select>
                 </div>
                 
-                <!-- Target Group Filter -->
-                <div class="ssd-filter-group">
-                    <label><?php ssd_e('target_groups'); ?></label>
-                    <select name="target_group" class="ssd-filter-select">
-                        <option value=""><?php ssd_e('all_target_groups'); ?></option>
-                        <?php foreach ($target_groups as $term): ?>
-                            <option value="<?php echo esc_attr($term->slug); ?>" 
-                                    <?php selected($target_group, $term->slug); ?>>
-                                <?php echo esc_html($term->name); ?> (<?php echo $term->count; ?>)
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                
                 <!-- Rating Filter -->
                 <div class="ssd-filter-group">
                     <label><?php ssd_e('minimum_rating'); ?></label>

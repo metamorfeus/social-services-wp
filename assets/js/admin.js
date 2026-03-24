@@ -83,16 +83,14 @@
     // ── CSV Import with progress ──────────────────────────────────────────────
 
     function initImportForm() {
-        var $form        = $('#ssd-import-form');
+        var $form         = $('#ssd-import-form');
         if (!$form.length) return;
 
-        var $startBtn    = $('#ssd-start-import');
-        var $formWrap    = $('#ssd-import-form-wrap');
+        var $formWrap     = $('#ssd-import-form-wrap');
         var $progressWrap = $('#ssd-import-progress-wrap');
-        var $resultsWrap = $('#ssd-import-results-wrap');
+        var $resultsWrap  = $('#ssd-import-results-wrap');
 
-        // Counters displayed during progress
-        var totals = { created: 0, updated: 0, skipped: 0, errors: 0 };
+        var totals    = { created: 0, merged: 0, skipped: 0, errors: 0 };
         var allErrors = [];
         var allSkips  = [];
 
@@ -105,24 +103,21 @@
                 return;
             }
 
-            var nonce      = $('#ssd-import-nonce').val();
-            var batchSize  = parseInt($('#batch_size').val(), 10) || 50;
+            var nonce         = $('#ssd-import-nonce').val();
+            var batchSize     = parseInt($('#batch_size').val(), 10) || 50;
             var updateExisting = $('#update_existing').is(':checked') ? '1' : '';
 
-            // Reset state
-            totals     = { created: 0, updated: 0, skipped: 0, errors: 0 };
-            allErrors  = [];
-            allSkips   = [];
+            totals    = { created: 0, merged: 0, skipped: 0, errors: 0 };
+            allErrors = [];
+            allSkips  = [];
             updateCounters();
 
-            // Hide form, show progress
             $formWrap.hide();
             $progressWrap.show();
             $resultsWrap.hide();
             setProgress(0, 0);
             setProgressText('Uploading file…');
 
-            // Step 1: upload file and start session
             var startData = new FormData();
             startData.append('action',          'ssd_import_start');
             startData.append('nonce',           nonce);
@@ -152,8 +147,6 @@
             });
         });
 
-        // ── Batch loop ────────────────────────────────────────────────────────
-
         function processBatch(nonce, sessionId, offset, total) {
             $.post(ajaxurl, {
                 action:     'ssd_import_batch',
@@ -169,9 +162,8 @@
 
                 var d = res.data;
 
-                // Accumulate totals
                 totals.created += d.imported;
-                totals.updated += d.updated;
+                totals.merged  += d.merged;
                 totals.skipped += d.skipped;
                 totals.errors  += d.errors.length;
 
@@ -180,9 +172,7 @@
 
                 updateCounters();
                 setProgress(d.offset, d.total);
-                setProgressText(
-                    'Processing ' + Math.min(d.offset, d.total) + ' of ' + d.total + ' rows…'
-                );
+                setProgressText('Processing ' + Math.min(d.offset, d.total) + ' of ' + d.total + ' rows…');
 
                 if (d.done) {
                     showResults(d.total);
@@ -191,11 +181,9 @@
                 }
             })
             .fail(function () {
-                showFatalError('Network error while processing batch at offset ' + offset + '. The import may be incomplete.');
+                showFatalError('Network error at offset ' + offset + '. The import may be incomplete.');
             });
         }
-
-        // ── UI helpers ────────────────────────────────────────────────────────
 
         function setProgress(offset, total) {
             var pct = total > 0 ? Math.round((offset / total) * 100) : 0;
@@ -208,7 +196,7 @@
 
         function updateCounters() {
             $('#cnt-created').text(totals.created);
-            $('#cnt-updated').text(totals.updated);
+            $('#cnt-merged').text(totals.merged);
             $('#cnt-skipped').text(totals.skipped);
             $('#cnt-errors').text(totals.errors);
         }
@@ -225,14 +213,12 @@
             setProgress(totalProcessed, totalProcessed);
             setProgressText('Import complete.');
 
-            // Populate results table
             $('#res-total').text(totalProcessed);
             $('#res-created').text(totals.created);
-            $('#res-updated').text(totals.updated);
+            $('#res-merged').text(totals.merged);
             $('#res-skipped').text(totals.skipped);
             $('#res-errors').text(totals.errors);
 
-            // Error list
             if (allErrors.length > 0) {
                 var errorHtml = '';
                 allErrors.forEach(function (e) {
@@ -246,7 +232,6 @@
                 $('#ssd-error-details').show();
             }
 
-            // Skipped list
             if (allSkips.length > 0) {
                 var skipHtml = '';
                 allSkips.forEach(function (s) {
@@ -267,12 +252,11 @@
             return $('<div>').text(str).html();
         }
 
-        // "Import another file" resets the UI
         $('#ssd-import-again').on('click', function () {
             $form[0].reset();
-            totals     = { created: 0, updated: 0, skipped: 0, errors: 0 };
-            allErrors  = [];
-            allSkips   = [];
+            totals    = { created: 0, merged: 0, skipped: 0, errors: 0 };
+            allErrors = [];
+            allSkips  = [];
             updateCounters();
             $progressWrap.find('.notice').remove();
             $('#ssd-error-details').hide();

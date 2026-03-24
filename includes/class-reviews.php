@@ -42,7 +42,45 @@ class SSD_Reviews {
     public function render_reviews_page() {
         global $wpdb;
         $table = $wpdb->prefix . 'ssd_reviews';
-        
+
+        // Handle single GET actions (Approve / Delete links from the table)
+        if (isset($_GET['action'], $_GET['review_id'])) {
+            $single_action  = sanitize_text_field($_GET['action']);
+            $single_id      = intval($_GET['review_id']);
+            $allowed_single = array('approve', 'delete', 'spam');
+
+            if (in_array($single_action, $allowed_single, true)) {
+                $nonce_map = array(
+                    'approve' => 'approve_review',
+                    'delete'  => 'delete_review',
+                    'spam'    => 'spam_review',
+                );
+                if (check_admin_referer($nonce_map[$single_action])) {
+                    switch ($single_action) {
+                        case 'approve':
+                            $wpdb->update($table, array('status' => 'approved'), array('id' => $single_id), array('%s'), array('%d'));
+                            // Refresh cached rating for this provider
+                            $row = $wpdb->get_row($wpdb->prepare("SELECT provider_id FROM $table WHERE id = %d", $single_id));
+                            if ($row) {
+                                $rating_data = SSD_Database::get_provider_rating($row->provider_id);
+                                update_post_meta($row->provider_id, '_ssd_average_rating', $rating_data['average']);
+                                update_post_meta($row->provider_id, '_ssd_review_count',   $rating_data['count']);
+                            }
+                            break;
+                        case 'delete':
+                            $wpdb->delete($table, array('id' => $single_id), array('%d'));
+                            break;
+                        case 'spam':
+                            $wpdb->update($table, array('status' => 'spam'), array('id' => $single_id), array('%s'), array('%d'));
+                            break;
+                    }
+                    $redirect_status = isset($_GET['status']) ? sanitize_text_field($_GET['status']) : 'pending';
+                    wp_redirect(admin_url('edit.php?post_type=ssd_provider&page=ssd-reviews&status=' . $redirect_status . '&updated=1'));
+                    exit;
+                }
+            }
+        }
+
         // Handle bulk actions
         if (isset($_POST['action']) && $_POST['action'] !== '-1') {
             $this->handle_bulk_action();
@@ -151,11 +189,11 @@ class SSD_Reviews {
                                     <td><?php echo esc_html(date_i18n(get_option('date_format'), strtotime($review->created_at))); ?></td>
                                     <td>
                                         <?php if ($status === 'pending'): ?>
-                                            <a href="<?php echo wp_nonce_url(admin_url('edit.php?post_type=ssd_provider&page=ssd-reviews&action=approve&review_id=' . $review->id), 'approve_review'); ?>" class="button button-small">
+                                            <a href="<?php echo wp_nonce_url(admin_url('edit.php?post_type=ssd_provider&page=ssd-reviews&action=approve&review_id=' . $review->id . '&status=' . $status), 'approve_review'); ?>" class="button button-small button-primary">
                                                 <?php _e('Approve', 'social-services-directory'); ?>
                                             </a>
                                         <?php endif; ?>
-                                        <a href="<?php echo wp_nonce_url(admin_url('edit.php?post_type=ssd_provider&page=ssd-reviews&action=delete&review_id=' . $review->id), 'delete_review'); ?>" class="button button-small" onclick="return confirm('<?php _e('Are you sure?', 'social-services-directory'); ?>')">
+                                        <a href="<?php echo wp_nonce_url(admin_url('edit.php?post_type=ssd_provider&page=ssd-reviews&action=delete&review_id=' . $review->id . '&status=' . $status), 'delete_review'); ?>" class="button button-small" onclick="return confirm('<?php _e('Are you sure?', 'social-services-directory'); ?>')">
                                             <?php _e('Delete', 'social-services-directory'); ?>
                                         </a>
                                     </td>

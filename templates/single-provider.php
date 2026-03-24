@@ -43,6 +43,21 @@ $violations = get_post_meta($provider_id, '_ssd_violations', true);
 $municipality = wp_get_post_terms($provider_id, 'ssd_municipality');
 $services = wp_get_post_terms($provider_id, 'ssd_service_type');
 $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
+
+// Helper: parse Bulgarian date strings like "26.01.2026 г." into a timestamp
+function ssd_parse_date_str($date_str) {
+    if (empty($date_str)) return false;
+    $cleaned = trim(str_replace(array('г.', 'г'), '', $date_str));
+    $ts = strtotime($cleaned);
+    if ($ts) return $ts;
+    // Try explicit DD.MM.YYYY
+    $parts = explode('.', trim($cleaned, " \t."));
+    if (count($parts) === 3 && is_numeric($parts[0]) && is_numeric($parts[1]) && is_numeric($parts[2])) {
+        $ts = mktime(0, 0, 0, intval($parts[1]), intval($parts[0]), intval($parts[2]));
+        if ($ts > 0) return $ts;
+    }
+    return false;
+}
 ?>
 
 <div class="ssd-single-provider-wrapper">
@@ -167,7 +182,38 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
 
                     <div class="ssd-detail-item ssd-detail-full">
                         <span class="ssd-detail-label"><?php _e('Адрес:', 'social-services-directory'); ?></span>
-                        <span class="ssd-detail-value"><?php echo $address ? esc_html($address) : '-'; ?></span>
+                        <span class="ssd-detail-value">
+                            <?php echo $address ? esc_html($address) : '-'; ?>
+                            <?php if ($address): ?>
+                                <?php
+                                $map_query = $address;
+                                if ($settlement) $map_query .= ', ' . $settlement;
+                                if (!is_wp_error($municipality) && !empty($municipality)) {
+                                    $map_query .= ', ' . $municipality[0]->name;
+                                }
+                                $map_url = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($map_query);
+                                $api_key = get_option('ssd_map_api_key', '');
+                                if ($api_key) {
+                                    $embed_url = 'https://www.google.com/maps/embed/v1/place?key=' . rawurlencode($api_key) . '&q=' . rawurlencode($map_query) . '&language=bg';
+                                }
+                                ?>
+                                <?php if (!empty($api_key)): ?>
+                                    <div class="ssd-map-embed" style="margin-top:12px;">
+                                        <iframe
+                                            src="<?php echo esc_url($embed_url); ?>"
+                                            class="ssd-map-iframe"
+                                            allowfullscreen
+                                            loading="lazy"
+                                            referrerpolicy="no-referrer-when-downgrade">
+                                        </iframe>
+                                    </div>
+                                <?php endif; ?>
+                                <a href="<?php echo esc_url($map_url); ?>" target="_blank" rel="noopener" class="ssd-maps-link">
+                                    <span class="dashicons dashicons-location-alt"></span>
+                                    <?php _e('Виж на Google Maps', 'social-services-directory'); ?>
+                                </a>
+                            <?php endif; ?>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -215,11 +261,9 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
                             <span class="ssd-detail-value">
                                 <?php
                                 if ($license_validity) {
-                                    $validity_date = strtotime($license_validity);
-                                    echo esc_html(date('d.m.Y', $validity_date));
-
-                                    // Check if expired
-                                    if ($validity_date < time()) {
+                                    $validity_ts = ssd_parse_date_str($license_validity);
+                                    echo $validity_ts ? esc_html(date('d.m.Y', $validity_ts)) : esc_html($license_validity);
+                                    if ($validity_ts && $validity_ts < time()) {
                                         echo ' <span class="ssd-expired-badge">' . esc_html__('Изтекъл', 'social-services-directory') . '</span>';
                                     }
                                 } else {
@@ -246,10 +290,9 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
                                 <span class="ssd-detail-value">
                                     <?php
                                     if ($license_modified_validity) {
-                                        $validity_date = strtotime($license_modified_validity);
-                                        echo esc_html(date('d.m.Y', $validity_date));
-
-                                        if ($validity_date < time()) {
+                                        $validity_ts = ssd_parse_date_str($license_modified_validity);
+                                        echo $validity_ts ? esc_html(date('d.m.Y', $validity_ts)) : esc_html($license_modified_validity);
+                                        if ($validity_ts && $validity_ts < time()) {
                                             echo ' <span class="ssd-expired-badge">' . esc_html__('Изтекъл', 'social-services-directory') . '</span>';
                                         }
                                     } else {
@@ -277,14 +320,10 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
                                 <span class="ssd-detail-value">
                                     <?php
                                     if ($license_renewed_validity) {
-                                        $validity_date = strtotime($license_renewed_validity);
-                                        if ($validity_date) {
-                                            echo esc_html(date('d.m.Y', $validity_date));
-                                            if ($validity_date < time()) {
-                                                echo ' <span class="ssd-expired-badge">' . esc_html__('Изтекъл', 'social-services-directory') . '</span>';
-                                            }
-                                        } else {
-                                            echo esc_html($license_renewed_validity);
+                                        $validity_ts = ssd_parse_date_str($license_renewed_validity);
+                                        echo $validity_ts ? esc_html(date('d.m.Y', $validity_ts)) : esc_html($license_renewed_validity);
+                                        if ($validity_ts && $validity_ts < time()) {
+                                            echo ' <span class="ssd-expired-badge">' . esc_html__('Изтекъл', 'social-services-directory') . '</span>';
                                         }
                                     } else {
                                         echo '-';
@@ -423,12 +462,19 @@ $target_groups = wp_get_post_terms($provider_id, 'ssd_target_group');
                             <?php _e('Напишете отзив', 'social-services-directory'); ?>
                         </button>
                     <?php else: ?>
-                        <p class="ssd-login-notice">
-                            <?php printf(
-                                __('<a href="%s">Влезте</a>, за да напишете отзив.', 'social-services-directory'),
-                                esc_url(wp_login_url(get_permalink()))
-                            ); ?>
-                        </p>
+                        <div class="ssd-review-login-notice">
+                            <p><?php _e('За да напишете отзив, трябва да влезете или да се регистрирате.', 'social-services-directory'); ?></p>
+                            <div class="ssd-review-login-actions">
+                                <a href="<?php echo esc_url(wp_login_url(get_permalink())); ?>" class="ssd-action-button ssd-login-btn">
+                                    <?php _e('Влезте', 'social-services-directory'); ?>
+                                </a>
+                                <?php if (get_option('users_can_register')): ?>
+                                    <a href="<?php echo esc_url(wp_registration_url()); ?>" class="ssd-action-button ssd-register-btn">
+                                        <?php _e('Регистрирайте се', 'social-services-directory'); ?>
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                        </div>
                     <?php endif; ?>
                 </div>
             <?php endif; ?>

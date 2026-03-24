@@ -179,13 +179,25 @@
                 SSD.openReviewModal(id);
             });
 
-            // Star rating selection
+            // Star rating — click to select
             $(document).on('click', '.ssd-star-input', function () {
-                var val = $(this).data('value');
+                var val = parseInt($(this).data('value'), 10);
+                var labels = ['', '1 — Много лошо', '2 — Лошо', '3 — Средно', '4 — Добро', '5 — Отлично'];
                 $('#ssd-review-modal input[name="rating"]').val(val);
                 $('.ssd-star-input').each(function () {
-                    $(this).toggleClass('selected', parseInt($(this).data('value')) <= val);
+                    $(this).toggleClass('selected', parseInt($(this).data('value'), 10) <= val);
                 });
+                $('.ssd-star-label').text(labels[val] || '');
+            });
+
+            // Star rating — hover preview
+            $(document).on('mouseenter', '.ssd-star-input', function () {
+                var val = parseInt($(this).data('value'), 10);
+                $('.ssd-star-input').each(function () {
+                    $(this).toggleClass('hovered', parseInt($(this).data('value'), 10) <= val);
+                });
+            }).on('mouseleave', '.ssd-star-input', function () {
+                $('.ssd-star-input').removeClass('hovered');
             });
 
             // Submit review
@@ -203,10 +215,13 @@
                 })
                 .done(function (res) {
                     if (res.success) {
-                        $('#ssd-review-modal').hide();
-                        alert(res.data.message);
+                        $('#ssd-review-form').hide();
+                        $('.ssd-review-notice-success').text(res.data.message).show();
+                        setTimeout(function () {
+                            $('#ssd-review-modal, #ssd-review-modal-overlay').fadeOut();
+                        }, 2500);
                     } else {
-                        alert(res.data.message);
+                        $('.ssd-review-notice-error').text(res.data.message).show();
                     }
                 });
             });
@@ -221,37 +236,45 @@
         openReviewModal: function (providerId) {
             if (!$('#ssd-review-modal').length) {
                 $('body').append(
-                    '<div id="ssd-review-modal-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998"></div>' +
-                    '<div id="ssd-review-modal" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;padding:30px;border-radius:8px;z-index:9999;min-width:340px;max-width:90vw">' +
-                        '<span class="ssd-modal-close" style="position:absolute;top:10px;right:15px;cursor:pointer;font-size:22px">&times;</span>' +
-                        '<h3 style="margin-top:0">Напишете отзив</h3>' +
+                    '<div id="ssd-review-modal-overlay" class="ssd-modal-overlay"></div>' +
+                    '<div id="ssd-review-modal" class="ssd-review-modal-box">' +
+                        '<span class="ssd-modal-close">&times;</span>' +
+                        '<h3 class="ssd-modal-title">Напишете отзив</h3>' +
+                        '<div class="ssd-review-notice ssd-review-notice-error" style="display:none"></div>' +
+                        '<div class="ssd-review-notice ssd-review-notice-success" style="display:none"></div>' +
                         '<form id="ssd-review-form">' +
                             '<input type="hidden" name="provider_id" value="">' +
                             '<input type="hidden" name="rating" value="0">' +
-                            '<div style="margin-bottom:15px">' +
-                                '<label>Оценка</label><br>' +
-                                '<span class="ssd-star-input" data-value="1" style="cursor:pointer;font-size:24px">&#9733;</span>' +
-                                '<span class="ssd-star-input" data-value="2" style="cursor:pointer;font-size:24px">&#9733;</span>' +
-                                '<span class="ssd-star-input" data-value="3" style="cursor:pointer;font-size:24px">&#9733;</span>' +
-                                '<span class="ssd-star-input" data-value="4" style="cursor:pointer;font-size:24px">&#9733;</span>' +
-                                '<span class="ssd-star-input" data-value="5" style="cursor:pointer;font-size:24px">&#9733;</span>' +
+                            '<div class="ssd-modal-field">' +
+                                '<label class="ssd-modal-label">Оценка <span class="ssd-required">*</span></label>' +
+                                '<div class="ssd-star-row" role="group" aria-label="Рейтинг">' +
+                                    '<span class="ssd-star-input" data-value="1" title="1 звезда">&#9733;</span>' +
+                                    '<span class="ssd-star-input" data-value="2" title="2 звезди">&#9733;</span>' +
+                                    '<span class="ssd-star-input" data-value="3" title="3 звезди">&#9733;</span>' +
+                                    '<span class="ssd-star-input" data-value="4" title="4 звезди">&#9733;</span>' +
+                                    '<span class="ssd-star-input" data-value="5" title="5 звезди">&#9733;</span>' +
+                                    '<span class="ssd-star-label"></span>' +
+                                '</div>' +
                             '</div>' +
-                            '<div style="margin-bottom:15px">' +
-                                '<label>Заглавие</label><br>' +
-                                '<input type="text" name="title" style="width:100%" required>' +
+                            '<div class="ssd-modal-field">' +
+                                '<label class="ssd-modal-label">Заглавие <span class="ssd-required">*</span></label>' +
+                                '<input type="text" name="title" class="ssd-modal-input" required>' +
                             '</div>' +
-                            '<div style="margin-bottom:15px">' +
-                                '<label>Текст на отзива</label><br>' +
-                                '<textarea name="review_text" rows="4" style="width:100%" required></textarea>' +
+                            '<div class="ssd-modal-field">' +
+                                '<label class="ssd-modal-label">Текст на отзива <span class="ssd-required">*</span></label>' +
+                                '<textarea name="review_text" rows="4" class="ssd-modal-textarea" required></textarea>' +
                             '</div>' +
-                            '<button type="submit" class="button button-primary">Изпрати</button>' +
+                            '<button type="submit" class="button button-primary ssd-modal-submit">Изпрати</button>' +
                         '</form>' +
                     '</div>'
                 );
             }
             $('#ssd-review-modal input[name="provider_id"]').val(providerId);
             $('#ssd-review-modal input[name="rating"]').val(0);
-            $('.ssd-star-input').removeClass('selected');
+            $('.ssd-star-input').removeClass('selected hovered');
+            $('.ssd-star-label').text('');
+            $('#ssd-review-form').show();
+            $('.ssd-review-notice').hide().text('');
             $('#ssd-review-modal, #ssd-review-modal-overlay').show();
         },
 

@@ -21,6 +21,9 @@ class SSD_Meta_Boxes {
     private function __construct() {
         add_action('add_meta_boxes', array($this, 'add_meta_boxes'));
         add_action('save_post_ssd_provider', array($this, 'save_meta_boxes'), 10, 2);
+        add_action('wp_ajax_ssd_add_photo',      array($this, 'ajax_add_photo'));
+        add_action('wp_ajax_ssd_remove_photo',   array($this, 'ajax_remove_photo'));
+        add_action('wp_ajax_ssd_reorder_photos', array($this, 'ajax_reorder_photos'));
     }
     
     /**
@@ -241,5 +244,109 @@ class SSD_Meta_Boxes {
                 update_post_meta($post_id, '_' . $field, sanitize_text_field($_POST[$field]));
             }
         }
+    }
+
+    // ── Photo AJAX ────────────────────────────────────────────────────────────
+
+    public function ajax_add_photo() {
+        check_ajax_referer('ssd_admin_nonce', 'nonce');
+        if (!current_user_can('edit_posts')) {
+            wp_send_json_error(array('message' => 'Unauthorized.'));
+            return;
+        }
+
+        $post_id       = intval($_POST['post_id'] ?? 0);
+        $attachment_id = intval($_POST['attachment_id'] ?? 0);
+
+        if (!$post_id || !$attachment_id) {
+            wp_send_json_error(array('message' => 'Invalid parameters.'));
+            return;
+        }
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'ssd_photos';
+
+        $max_order = (int) $wpdb->get_var($wpdb->prepare(
+            "SELECT COALESCE(MAX(display_order), -1) FROM $table WHERE provider_id = %d",
+            $post_id
+        ));
+
+        $result = $wpdb->insert($table, array(
+            'provider_id'   => $post_id,
+            'attachment_id' => $attachment_id,
+            'display_order' => $max_order + 1,
+            'uploaded_by'   => get_current_user_id(),
+        ));
+
+        if (!$result) {
+            wp_send_json_error(array('message' => 'Failed to save photo record.'));
+            return;
+        }
+
+        $photo_id = $wpdb->insert_id;
+        $img      = wp_get_attachment_image($attachment_id, 'thumbnail');
+        $html     = '<div class="ssd-photo-item" data-photo-id="' . esc_attr($photo_id) . '">' .
+                    $img .
+                    '<button type="button" class="button ssd-remove-photo">' . esc_html__('Remove', 'social-services-directory') . '</button>' .
+                    '</div>';
+
+        wp_send_json_success(array('html' => $html));
+    }
+
+    public function ajax_remove_photo() {
+        check_ajax_referer('ssd_admin_nonce', 'nonce');
+        if (!current_user_can('edit_posts')) {
+            wp_send_json_error(array('message' => 'Unauthorized.'));
+            return;
+        }
+
+        $photo_id = intval($_POST['photo_id'] ?? 0);
+        $post_id  = intval($_POST['post_id'] ?? 0);
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'ssd_photos';
+
+        $photo = $wpdb->get_row($wpdb->prepare(
+            "SELECT id FROM $table WHERE id = %d AND provider_id = %d",
+            $photo_id,
+            $post_id
+        ));
+
+        if (!$photo) {
+            wp_send_json_error(array('message' => 'Photo not found.'));
+            return;
+        }
+
+        $wpdb->delete($table, array('id' => $photo_id), array('%d'));
+        wp_send_json_success();
+    }
+
+    public function ajax_reorder_photos() {
+        check_ajax_referer('ssd_admin_nonce', 'nonce');
+        if (!current_user_can('edit_posts')) {
+            wp_send_json_error(array('message' => 'Unauthorized.'));
+            return;
+        }
+
+        $order = json_decode(stripslashes($_POST['order'] ?? '[]'), true);
+        if (!is_array($order)) {
+            wp_send_json_error(array('message' => 'Invalid order data.'));
+            return;
+        }
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'ssd_photos';
+
+        foreach ($order as $item) {
+            $wpdb->update(
+                $table,
+                array('display_order' => intval($item['pos'])),
+                array('id' => intval($item['id'])),
+                array('%d'),
+                array('%d')
+            );
+        }
+
+        wp_send_json_success();
     }
 }

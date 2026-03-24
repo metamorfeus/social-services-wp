@@ -179,6 +179,11 @@ class Social_Services_Directory {
             true
         );
         
+        // Dynamic grid column CSS
+        $grid_cols  = intval(get_option('ssd_grid_columns', 3));
+        $inline_css = ".ssd-providers-grid { grid-template-columns: repeat({$grid_cols}, 1fr); }";
+        wp_add_inline_style('ssd-frontend', $inline_css);
+
         // Localize script with Bulgarian translations
         wp_localize_script('ssd-frontend', 'ssdAjax', array(
             'ajaxurl' => admin_url('admin-ajax.php'),
