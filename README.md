@@ -1,8 +1,13 @@
 # Social Services Directory - WordPress Plugin
 
-**Version:** 1.0.0  
-**Requires:** WordPress 5.8+  
-**Requires PHP:** 7.4+  
+Developed by **[Metamorfeus](https://metamorfeus.com)** — a digital agency specialising in custom WordPress development, web design, and digital transformation for organisations across Bulgaria.
+
+---
+
+**Version:** 1.0.0
+**Author:** [Metamorfeus](https://metamorfeus.com)
+**Requires:** WordPress 5.8+
+**Requires PHP:** 7.4+
 **License:** GPL v2 or later
 
 ## 📋 Description
@@ -340,10 +345,9 @@ $is_fav = SSD_Database::is_favorited($user_id, $provider_id);
 
 ## 🙏 Credits
 
-Developed for Bulgarian Social Services Registry  
-Built with WordPress best practices  
-Uses Select2 for enhanced dropdowns
+Developed by [Metamorfeus](https://metamorfeus.com) for the Bulgarian Social Services Registry.
+Built with WordPress best practices. Uses Select2 for enhanced dropdowns.
 
 ---
 
-**Made with ❤️ for Social Services**
+**Built by [Metamorfeus](https://metamorfeus.com) — digital agency, Bulgaria**
