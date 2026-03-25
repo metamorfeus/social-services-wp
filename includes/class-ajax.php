@@ -64,10 +64,11 @@ class SSD_Ajax {
         wp_reset_postdata();
         
         wp_send_json_success(array(
-            'html' => $html,
-            'found' => $query->found_posts,
-            'max_pages' => $query->max_num_pages,
-            'current_page' => $filters['paged']
+            'html'         => $html,
+            'found'        => $query->found_posts,
+            'post_count'   => $query->post_count,
+            'max_pages'    => $query->max_num_pages,
+            'current_page' => $filters['paged'],
         ));
     }
     

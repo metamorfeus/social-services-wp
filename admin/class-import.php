@@ -84,6 +84,18 @@ class SSD_Import {
                                 <p class="description"><?php _e('When a provider is found by EIK, new services are always merged. Tick this to also refresh contact details, address and licence fields.', 'social-services-directory'); ?></p>
                             </td>
                         </tr>
+                        <tr>
+                            <th></th>
+                            <td>
+                                <label style="color:#c0392b;">
+                                    <input type="checkbox" id="clear_existing" name="clear_existing" value="1">
+                                    <strong><?php _e('Delete ALL existing providers before import', 'social-services-directory'); ?></strong>
+                                </label>
+                                <p class="description" style="color:#c0392b;">
+                                    ⚠️ <?php _e('WARNING: This will permanently delete every existing provider, their photos, reviews and favorites before the import begins. This cannot be undone.', 'social-services-directory'); ?>
+                                </p>
+                            </td>
+                        </tr>
                     </table>
 
                     <p class="submit">
@@ -247,6 +259,19 @@ class SSD_Import {
         return key($counts);
     }
 
+    // ── Normalise municipality names ──────────────────────────────────────────
+
+    /**
+     * Merge known municipality name variants into canonical names.
+     * E.g. "Столична" and "София" both refer to Sofia Municipality.
+     */
+    private function normalize_municipality($name) {
+        static $map = array(
+            'Столична' => 'София',
+        );
+        return isset($map[$name]) ? $map[$name] : $name;
+    }
+
     // ── Normalise column headers (Bulgarian → English) ────────────────────────
 
     private function normalize_headers($headers) {
@@ -379,6 +404,19 @@ class SSD_Import {
 
         $batch_size      = max(1, intval($_POST['batch_size'] ?? 50));
         $update_existing = !empty($_POST['update_existing']);
+        $clear_existing  = !empty($_POST['clear_existing']);
+
+        if ($clear_existing) {
+            $all_providers = get_posts(array(
+                'post_type'      => 'ssd_provider',
+                'posts_per_page' => -1,
+                'post_status'    => 'any',
+                'fields'         => 'ids',
+            ));
+            foreach ($all_providers as $pid) {
+                wp_delete_post($pid, true);
+            }
+        }
 
         // Store session metadata in a JSON file next to the CSV.
         // Using the filesystem avoids object-cache issues on hosts that do not
@@ -615,7 +653,7 @@ class SSD_Import {
             if (!empty($data['municipality'])) {
                 $existing_muni = wp_get_post_terms($provider_id, 'ssd_municipality');
                 if ($update_existing || empty($existing_muni) || is_wp_error($existing_muni)) {
-                    $muni_name    = sanitize_text_field(trim($data['municipality']));
+                    $muni_name    = $this->normalize_municipality(sanitize_text_field(trim($data['municipality'])));
                     $municipality = term_exists($muni_name, 'ssd_municipality');
                     if (!$municipality) {
                         $municipality = wp_insert_term($muni_name, 'ssd_municipality');
@@ -643,6 +681,18 @@ class SSD_Import {
                 if (!empty($new_term_ids)) {
                     // append=true keeps existing terms and adds new ones
                     wp_set_post_terms($provider_id, $new_term_ids, 'ssd_service_type', true);
+                }
+            }
+
+            // Target group taxonomy
+            if (!empty($data['target_group'])) {
+                $tg_name = sanitize_text_field(trim($data['target_group']));
+                $tg_term = term_exists($tg_name, 'ssd_target_group');
+                if (!$tg_term) {
+                    $tg_term = wp_insert_term($tg_name, 'ssd_target_group');
+                }
+                if (!is_wp_error($tg_term)) {
+                    wp_set_post_terms($provider_id, array(intval($tg_term['term_id'])), 'ssd_target_group', true);
                 }
             }
 
@@ -688,7 +738,7 @@ class SSD_Import {
 
         // Municipality taxonomy
         if (!empty($data['municipality'])) {
-            $muni_name    = sanitize_text_field(trim($data['municipality']));
+            $muni_name    = $this->normalize_municipality(sanitize_text_field(trim($data['municipality'])));
             $municipality = term_exists($muni_name, 'ssd_municipality');
             if (!$municipality) {
                 $municipality = wp_insert_term($muni_name, 'ssd_municipality');
@@ -714,6 +764,18 @@ class SSD_Import {
             }
             if (!empty($term_ids)) {
                 wp_set_post_terms($provider_id, $term_ids, 'ssd_service_type');
+            }
+        }
+
+        // Target group taxonomy
+        if (!empty($data['target_group'])) {
+            $tg_name = sanitize_text_field(trim($data['target_group']));
+            $tg_term = term_exists($tg_name, 'ssd_target_group');
+            if (!$tg_term) {
+                $tg_term = wp_insert_term($tg_name, 'ssd_target_group');
+            }
+            if (!is_wp_error($tg_term)) {
+                wp_set_post_terms($provider_id, array(intval($tg_term['term_id'])), 'ssd_target_group');
             }
         }
 

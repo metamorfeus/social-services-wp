@@ -92,26 +92,29 @@ class SSD_Frontend {
         $tax_query = array('relation' => 'AND');
         
         if (!empty($args['municipality'])) {
+            $field = is_numeric($args['municipality']) ? 'term_id' : 'slug';
             $tax_query[] = array(
                 'taxonomy' => 'ssd_municipality',
-                'field' => 'slug',
-                'terms' => $args['municipality']
+                'field'    => $field,
+                'terms'    => $field === 'term_id' ? intval($args['municipality']) : $args['municipality'],
             );
         }
-        
+
         if (!empty($args['service'])) {
+            $field = is_numeric($args['service']) ? 'term_id' : 'slug';
             $tax_query[] = array(
                 'taxonomy' => 'ssd_service_type',
-                'field' => 'slug',
-                'terms' => $args['service']
+                'field'    => $field,
+                'terms'    => $field === 'term_id' ? intval($args['service']) : $args['service'],
             );
         }
-        
+
         if (!empty($args['target_group'])) {
+            $field = is_numeric($args['target_group']) ? 'term_id' : 'slug';
             $tax_query[] = array(
                 'taxonomy' => 'ssd_target_group',
-                'field' => 'slug',
-                'terms' => $args['target_group']
+                'field'    => $field,
+                'terms'    => $field === 'term_id' ? intval($args['target_group']) : $args['target_group'],
             );
         }
         

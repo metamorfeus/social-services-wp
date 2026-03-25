@@ -61,7 +61,7 @@
                 .done(function (res) {
                     if (res.success) {
                         $('.ssd-providers-grid').html(res.data.html);
-                        SSD.updateResultsCount(res.data.found);
+                        SSD.updateResultsCount(res.data.post_count, res.data.found);
                         SSD.updateLoadMore(res.data.current_page, res.data.max_pages);
                         $container.data('paged', 1)
                                   .data('max-pages', res.data.max_pages);
@@ -294,9 +294,9 @@
             $('#ssd-loading-overlay').remove();
         },
 
-        updateResultsCount: function (count) {
-            $('.ssd-results-count strong:first').text(count);
-            $('.ssd-results-count strong:last').text(count);
+        updateResultsCount: function (pageCount, totalFound) {
+            $('.ssd-results-count strong:first').text(pageCount);
+            $('.ssd-results-count strong:last').text(totalFound);
         },
 
         updateLoadMore: function (page, maxPages) {

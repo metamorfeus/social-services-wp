@@ -8,9 +8,9 @@ if (!defined('ABSPATH')) {
 }
 
 // Get filter parameters
-$municipality = isset($_GET['municipality']) ? sanitize_text_field($_GET['municipality']) : '';
-$service = isset($_GET['service']) ? sanitize_text_field($_GET['service']) : '';
-$target_group = isset($_GET['target_group']) ? sanitize_text_field($_GET['target_group']) : '';
+$municipality = isset($_GET['municipality']) ? intval($_GET['municipality']) : 0;
+$service      = isset($_GET['service'])      ? intval($_GET['service'])      : 0;
+$target_group = isset($_GET['target_group']) ? intval($_GET['target_group']) : 0;
 $min_rating = isset($_GET['rating']) ? floatval($_GET['rating']) : 0;
 $search = isset($_GET['search']) ? sanitize_text_field($_GET['search']) : '';
 $view_mode = isset($_GET['view']) ? sanitize_text_field($_GET['view']) : $atts['view'];
@@ -22,15 +22,15 @@ $query_args = array(
     'posts_per_page' => $atts['per_page']
 );
 
-if ($municipality) {
+if ($municipality > 0) {
     $query_args['municipality'] = $municipality;
 }
 
-if ($service) {
+if ($service > 0) {
     $query_args['service'] = $service;
 }
 
-if ($target_group) {
+if ($target_group > 0) {
     $query_args['target_group'] = $target_group;
 }
 
@@ -100,10 +100,10 @@ $target_groups = get_terms(array(
                 <div class="ssd-filter-group">
                     <label><?php ssd_e('municipality'); ?></label>
                     <select name="municipality" class="ssd-filter-select">
-                        <option value=""><?php ssd_e('all_municipalities'); ?></option>
+                        <option value="0"><?php ssd_e('all_municipalities'); ?></option>
                         <?php foreach ($municipalities as $term): ?>
-                            <option value="<?php echo esc_attr($term->slug); ?>" 
-                                    <?php selected($municipality, $term->slug); ?>>
+                            <option value="<?php echo esc_attr($term->term_id); ?>"
+                                    <?php selected($municipality, $term->term_id); ?>>
                                 <?php echo esc_html($term->name); ?> (<?php echo $term->count; ?>)
                             </option>
                         <?php endforeach; ?>
@@ -114,10 +114,10 @@ $target_groups = get_terms(array(
                 <div class="ssd-filter-group">
                     <label><?php ssd_e('services_offered'); ?></label>
                     <select name="service" class="ssd-filter-select">
-                        <option value=""><?php ssd_e('all_services'); ?></option>
+                        <option value="0"><?php ssd_e('all_services'); ?></option>
                         <?php foreach ($services as $term): ?>
-                            <option value="<?php echo esc_attr($term->slug); ?>" 
-                                    <?php selected($service, $term->slug); ?>>
+                            <option value="<?php echo esc_attr($term->term_id); ?>"
+                                    <?php selected($service, $term->term_id); ?>>
                                 <?php echo esc_html($term->name); ?> (<?php echo $term->count; ?>)
                             </option>
                         <?php endforeach; ?>

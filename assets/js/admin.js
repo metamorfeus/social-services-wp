@@ -124,6 +124,7 @@
             startData.append('csv_file',        fileInput.files[0]);
             startData.append('batch_size',      batchSize);
             startData.append('update_existing', updateExisting);
+            startData.append('clear_existing',  $('#clear_existing').is(':checked') ? '1' : '');
 
             $.ajax({
                 url:         ajaxurl,
